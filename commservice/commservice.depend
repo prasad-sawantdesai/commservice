@@ -1,0 +1,34 @@
+# depslib dependency file v1.0
+1593114995 source:/home/pi/futuremaker/application/commservice/commservice/commservice/src/LibModbusClient.cpp
+	"LibModbusClient.h"
+	<string>
+	<iostream>
+	<time.h>
+
+1593114335 /home/pi/futuremaker/application/commservice/commservice/commservice/include/LibModbusClient.h
+	<string>
+	"modbus.h"
+
+1593114603 source:/home/pi/futuremaker/application/commservice/commservice/commservice/main.cpp
+	<iostream>
+	"LibModbusClient.h"
+	<cstdlib>
+	<pthread.h>
+
+1592503212 /usr/local/include/modbus/modbus.h
+	<sys/param.h>
+	<stdint.h>
+	"stdint.h"
+	"modbus-version.h"
+	"modbus-tcp.h"
+	"modbus-rtu.h"
+
+1592503212 /usr/local/include/modbus/modbus-version.h
+
+1592503212 /usr/local/include/modbus/modbus-tcp.h
+	"modbus.h"
+	<winsock2.h>
+
+1592503212 /usr/local/include/modbus/modbus-rtu.h
+	"modbus.h"
+
