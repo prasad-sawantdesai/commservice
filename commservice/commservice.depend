@@ -1,19 +1,20 @@
 # depslib dependency file v1.0
-1593114995 source:/home/pi/futuremaker/application/commservice/commservice/commservice/src/LibModbusClient.cpp
+1593202040 source:/home/pi/futuremaker/application/commservice/commservice/commservice/src/LibModbusClient.cpp
 	"LibModbusClient.h"
 	<string>
 	<iostream>
-	<time.h>
 
-1593114335 /home/pi/futuremaker/application/commservice/commservice/commservice/include/LibModbusClient.h
+1593196323 /home/pi/futuremaker/application/commservice/commservice/commservice/include/LibModbusClient.h
 	<string>
 	"modbus.h"
 
-1593114603 source:/home/pi/futuremaker/application/commservice/commservice/commservice/main.cpp
+1593202980 source:/home/pi/futuremaker/application/commservice/commservice/commservice/main.cpp
 	<iostream>
 	"LibModbusClient.h"
 	<cstdlib>
 	<pthread.h>
+	<time.h>
+	"ConfigReader.h"
 
 1592503212 /usr/local/include/modbus/modbus.h
 	<sys/param.h>
@@ -31,4 +32,13 @@
 
 1592503212 /usr/local/include/modbus/modbus-rtu.h
 	"modbus.h"
+
+1593202852 source:/home/pi/futuremaker/application/commservice/commservice/commservice/src/ConfigReader.cpp
+	"ConfigReader.h"
+	<stdio.h>
+	<sqlite3.h>
+	<string>
+
+1593202914 /home/pi/futuremaker/application/commservice/commservice/commservice/include/ConfigReader.h
+	<string>
 

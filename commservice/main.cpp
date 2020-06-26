@@ -2,43 +2,85 @@
 #include "LibModbusClient.h"
 #include <cstdlib>
 #include <pthread.h>
+#include <time.h>
+#include "ConfigReader.h"
+
 using namespace std;
-#define NUM_THREADS 20
+
+#define NUM_THREADS 5
+
 void *modbustcp(void *slaveid)
 {
-   int sid;
-   sid = (long)slaveid;
-       cout<<"connected to ";
-    cout<<sid;
-
+    int sid = (long)slaveid;
+    cout<<"Modbus client is connecting to :"<<sid<<endl;
 
     LibModbusClient obj;
 
     obj= obj.CreateTcpClient("127.0.0.1",502);
     obj.SetSlaveID(sid);
     obj.connect();
-    uint16_t* array = obj.ReadHoldingRegisters(0, 5);
-    obj.close();
 
+//    timeval curTime;
+//gettimeofday(&curTime, NULL);
+//int milli = curTime.tv_usec / 1000;
+//
+//char buffer [80];
+//strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", localtime(&curTime.tv_sec));
+//
+//char currentTime[84] = "";
+//sprintf(currentTime, "%s:%03d", buffer, milli);
+//printf("current time: %s \n", currentTime);
+
+    time_t my_time = time(NULL);
+    uint16_t* holding_reg = obj.ReadHoldingRegisters(0, 20);
+
+    for (int i=0; i < 5; i++)
+    {
+        printf("%s :holding register[%d]=%d (0x%X)\n",ctime(&my_time),i, holding_reg[i], holding_reg[i]);
+    }
+
+    uint16_t* input_reg = obj.ReadInputRegisters(0, 20);
+
+    for (int i=0; i < 5; i++)
+    {
+        printf("%s :input register[%d]=%d (0x%X)\n",ctime(&my_time),i, input_reg[i], input_reg[i]);
+    }
+
+//    uint8_t* input_coils = obj.ReadInputCoils(0, 2);
+//
+//    for (int i=0; i < 5; i++)
+//    {
+//        printf("%s :input coils[%d]=%d (0x%X)\n",ctime(&my_time),i, input_coils[i], input_coils[i]);
+//    }
+    obj.close();
     return 0;
 }
 
-int main () {
-   pthread_t threads[NUM_THREADS];
-   int rc;
-   int i;
+int main ()
+{
+//Read databases
 
-   for( i = 0; i < NUM_THREADS; i++ ) {
-      cout << "main() : creating thread, " << i << endl;
-      rc = pthread_create(&threads[i], NULL, modbustcp, (void *)i);
+    ConfigReader obj = ConfigReader();
+    obj.Connect("/home/pi/futuremaker/prototypes/geany/sqlite_test/testdb.db");
 
-      if (rc) {
-         cout << "Error:unable to create thread," << rc << endl;
-         exit(-1);
-      }
-   }
-   pthread_exit(NULL);
+    pthread_t threads[NUM_THREADS];
+    int rc;
+    int i;
+
+    for( i = 0; i < NUM_THREADS; i++ )
+    {
+        cout << "\nmain() : creating modbus connection thread, " << i << endl;
+        rc = pthread_create(&threads[i], NULL, modbustcp, (void *)i);
+
+        if (rc)
+        {
+            cout << "\n Error:unable to create thread," << rc << endl;
+            exit(-1);
+        }
+    }
+    pthread_exit(NULL);
 }
+
 //    int *array = new int[number];
 //
 //    for (int i=0; i < rc; i++)
@@ -56,5 +98,9 @@ int main () {
 //    {
 //        printf("reg[%d]=%d (0x%X)\n", i, array[i], array[i]);
 //    }
-    /* Read 5 registers from the address 0 */
-    //modbus_read_registers(mb, 0, 5, tab_reg);
+/* Read 5 registers from the address 0 */
+//modbus_read_registers(mb, 0, 5, tab_reg);
+//    for (int i=0; i < rc; i++)
+//    {
+//        printf("%s : reg[%d]=%d (0x%X)\n", ctime(&my_time), i, tab_reg[i], tab_reg[i]);
+//    }

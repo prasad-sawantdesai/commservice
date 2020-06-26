@@ -18,6 +18,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-pthread" />
+					<Add option="-lsqlite3" />
 					<Add library="/usr/local/lib/libmodbus.so" />
 				</Linker>
 			</Target>
@@ -39,8 +40,10 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="include/ConfigReader.h" />
 		<Unit filename="include/LibModbusClient.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="src/ConfigReader.cpp" />
 		<Unit filename="src/LibModbusClient.cpp" />
 		<Extensions>
 			<code_completion />
