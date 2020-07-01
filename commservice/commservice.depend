@@ -42,3 +42,38 @@
 1593202914 /home/pi/futuremaker/application/commservice/commservice/commservice/include/ConfigReader.h
 	<string>
 
+1593452898 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/ConfigReader.cpp
+	"ConfigReader.h"
+	<stdio.h>
+	<sqlite3.h>
+	<string>
+
+1593452898 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/ConfigReader.h
+	<string>
+
+1593628266 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/LibModbusClient.cpp
+	"LibModbusClient.h"
+	<string>
+	<iostream>
+
+1593628266 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/LibModbusClient.h
+	<string>
+	"modbus.h"
+
+1575875089 /usr/include/modbus/modbus.h
+	<sys/param.h>
+	<stdint.h>
+	"stdint.h"
+	"modbus-version.h"
+	"modbus-tcp.h"
+	"modbus-rtu.h"
+
+1575875089 /usr/include/modbus/modbus-version.h
+
+1575875089 /usr/include/modbus/modbus-tcp.h
+	"modbus.h"
+	<winsock2.h>
+
+1575875089 /usr/include/modbus/modbus-rtu.h
+	"modbus.h"
+

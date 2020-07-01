@@ -23,7 +23,7 @@ class LibModbusClient
 
         LibModbusClient CreateTcpClient(string, int);
 
-        LibModbusClient CreateRtuClient(string, int, int, int, int);
+        LibModbusClient CreateRtuClient(string, int, char, int, int);
         int SetSlaveID(int);
         uint8_t* ReadInputCoils(int, int);
         uint16_t* ReadHoldingRegisters(int, int);

@@ -21,7 +21,7 @@ LibModbusClient LibModbusClient::CreateTcpClient(string ip_address, int port)
     return object;
 }
 
-LibModbusClient LibModbusClient::CreateRtuClient(string port,int baudrate,int parity,int bytesize,int stopbits)
+LibModbusClient LibModbusClient::CreateRtuClient(string port,int baudrate,char parity,int bytesize,int stopbits)
 {
     LibModbusClient object = LibModbusClient();
     object.mb = modbus_new_rtu(port.c_str(), baudrate, parity, bytesize, stopbits);
