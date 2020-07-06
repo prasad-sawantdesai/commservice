@@ -1,0 +1,2 @@
+pyuic5 -i 0 master_view.ui -o master_view.py
+pyrcc5 resources\images_used.qrc  -o images_used_rc.py
