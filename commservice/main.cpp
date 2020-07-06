@@ -117,11 +117,11 @@ int main ()
 
     for( i = 0; i < NUM_THREADS; i++ )
     {
-//        cout << "\nmain() : creating tcp modbus connection thread, " << i << endl;
-//        rc = pthread_create(&threads[i], NULL, modbustcp, (void *)i);
+        cout << "\nmain() : creating tcp modbus connection thread, " << i << endl;
+        rc = pthread_create(&threads[i], NULL, modbustcp, (void *)i);
 
-        cout << "\nmain() : creating rtu modbus connection thread, " << i << endl;
-        rc = pthread_create(&threads[i], NULL, modbusrtu, (void *)i);
+        //cout << "\nmain() : creating rtu modbus connection thread, " << i << endl;
+        //rc = pthread_create(&threads[i], NULL, modbusrtu, (void *)i);
 
         if (rc)
         {
