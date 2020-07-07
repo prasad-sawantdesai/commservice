@@ -54,7 +54,7 @@ class FrmTagGroups(QDialog):
 
 		def store(self):
 				obj_db_management = DatabaseManagement(
-								r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+								r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 				plc_index = obj_db_management.get_plc_index(self.controller_collection.currentText())
 				machine_index = obj_db_management.get_machine_index(self.machine_collection.currentText())
 				tag_group = (plc_index, machine_index, self.collection_method.text(), self.collection_type.text())
@@ -77,7 +77,7 @@ class FrmTagGroups(QDialog):
 
 if __name__ == '__main__':
 		obj_db_management = DatabaseManagement(
-						r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+						r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 
 		app = QApplication(sys.argv)
 

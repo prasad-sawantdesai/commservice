@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <time.h>
 #include "ConfigReader.h"
+#include "DatabaseWriter.h"
 
 using namespace std;
 
@@ -106,11 +107,14 @@ void *modbusrtu(void *slaveid)
 
 int main ()
 {
-//Read databases
+//Read sqlite database
 
-    ConfigReader obj = ConfigReader();
-    obj.Connect("/home/pi/futuremaker/prototypes/geany/sqlite_test/testdb.db");
+    ConfigReader objConfigReader = ConfigReader();
+    objConfigReader.Connect("/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db");
 
+    //connect to mongo db
+    DatabaseWriter objDatabaseWriter = DatabaseWriter();
+    objDatabaseWriter.Connect("mongodb://localhost:27017");
     pthread_t threads[NUM_THREADS];
     int rc;
     int i;

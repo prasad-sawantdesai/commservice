@@ -38,7 +38,7 @@ class FrmAddRegisterTypes(QDialog):
 				self.form_group_box.setLayout(layout)
 
 		def store(self):
-				obj_db_management = DatabaseManagement(r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+				obj_db_management = DatabaseManagement(r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 				register_type = (self.register_type.text(), self.range_lower.text(), self.range_upper.text())
 				obj_db_management.create_register_types(register_type)
 				# self.close()

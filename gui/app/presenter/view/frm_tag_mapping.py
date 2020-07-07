@@ -21,7 +21,7 @@ class FrmAddMachine(QDialog):
 				self.tag_group_collection = QComboBox()
 
 				obj_db_management = DatabaseManagement(
-								r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+								r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 				tag_groups = obj_db_management.select_all_tag_groups()
 				for tag_group in tag_groups:
 						self.tag_group_collection.addItem(tag_group[1])

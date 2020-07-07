@@ -36,7 +36,7 @@ class FrmAddController(QDialog):
 				self.form_group_box.setLayout(layout)
 
 		def store(self):
-				obj_db_management = DatabaseManagement(r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+				obj_db_management = DatabaseManagement(r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 				controller = (self.controller_name.text(), self.controller_description.text())
 				obj_db_management.create_controller(controller)
 				QMessageBox.question(self, 'Controller message', "New controller added successfully",

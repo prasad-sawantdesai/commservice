@@ -21,7 +21,7 @@ class FrmAddMachine(QDialog):
 				self.controller_collection = QComboBox()
 
 				obj_db_management = DatabaseManagement(
-								r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+								r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 				controllers = obj_db_management.select_all_controllers()
 				for controller in controllers:
 						self.controller_collection.addItem(controller[1])
@@ -51,7 +51,7 @@ class FrmAddMachine(QDialog):
 
 		def store(self):
 				obj_db_management = DatabaseManagement(
-								r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+								r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 				plc_index = obj_db_management.get_plc_index(self.controller_collection.currentText())
 				machine = (self.machine_name.text(), self.machine_manual_id.text(), plc_index[0][0])
 				obj_db_management.create_machine(machine)

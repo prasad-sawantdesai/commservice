@@ -21,7 +21,7 @@ class FrmAddModbusRtuConnection(QDialog):
 				self.controller_collection = QComboBox()
 
 				obj_db_management = DatabaseManagement(
-								r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+								r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 				controllers = obj_db_management.select_all_controllers()
 				for controller in controllers:
 						self.controller_collection.addItem(controller[1])
@@ -78,7 +78,7 @@ class FrmAddModbusRtuConnection(QDialog):
 				self.close()
 
 if __name__ == '__main__':
-		obj_db_management = DatabaseManagement(r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+		obj_db_management = DatabaseManagement(r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 		app = QApplication(sys.argv)
 
 		dialog = FrmAddModbusRtuConnection()

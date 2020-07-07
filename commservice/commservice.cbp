@@ -15,11 +15,17 @@
 					<Add option="-g" />
 					<Add directory="include" />
 					<Add directory="/usr/include/modbus" />
+					<Add directory="/usr/local/include/libmongoc-1.0" />
+					<Add directory="/usr/local/include/libbson-1.0" />
 				</Compiler>
 				<Linker>
 					<Add option="-pthread" />
 					<Add option="-lsqlite3" />
+					<Add option="-lmongoc-1.0" />
+					<Add option="-lbson-1.0" />
 					<Add library="/usr/lib/x86_64-linux-gnu/libmodbus.so" />
+					<Add library="/usr/local/lib/libbson-1.0.so" />
+					<Add library="/usr/local/lib/libmongoc-1.0.so" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -41,9 +47,11 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="include/ConfigReader.h" />
+		<Unit filename="include/DatabaseWriter.h" />
 		<Unit filename="include/LibModbusClient.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/ConfigReader.cpp" />
+		<Unit filename="src/DatabaseWriter.cpp" />
 		<Unit filename="src/LibModbusClient.cpp" />
 		<Extensions />
 	</Project>

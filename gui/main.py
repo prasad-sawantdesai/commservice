@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
 def main():
 		app = QApplication(sys.argv)
 		# for the splash screen
-		splash_pix = QtGui.QPixmap("resources\\splash_screen.png")
+		splash_pix = QtGui.QPixmap(r"resources/splash_screen.png")
 		# Creates the splash screen
 		splash = QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
 		splash.setMask(splash_pix.mask())
@@ -147,7 +147,7 @@ def main():
 		app.processEvents()
 		time.sleep(2)
 		obj_db_management = DatabaseManagement(
-						r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice.db")
+						r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 
 		ex = MainWindow()
 		# closes the splash screen
