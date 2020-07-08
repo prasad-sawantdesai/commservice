@@ -1,14 +1,14 @@
 import sys
 
 from PySide2.QtWidgets import QApplication, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QGroupBox, QLabel, \
-		QLineEdit, QRadioButton, QVBoxLayout, QMessageBox
+		QLineEdit, QMessageBox, QVBoxLayout
 
 from app.utilities.database_management import DatabaseManagement
 
 PROTOCOL_NAME = "Modbus RTU"
+
+
 class FrmAddModbusRtuConnection(QDialog):
-		NumGridRows = 3
-		NumButtons = 4
 
 		def __init__(self):
 				super(FrmAddModbusRtuConnection, self).__init__()
@@ -20,8 +20,7 @@ class FrmAddModbusRtuConnection(QDialog):
 				self.form_layout_plc_selection = QFormLayout()
 				self.controller_collection = QComboBox()
 
-				obj_db_management = DatabaseManagement(
-								r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
+				obj_db_management = DatabaseManagement.get_instance()
 				controllers = obj_db_management.select_all_controllers()
 				for controller in controllers:
 						self.controller_collection.addItem(controller[1])
@@ -57,28 +56,36 @@ class FrmAddModbusRtuConnection(QDialog):
 				main_layout.addWidget(self.group_box_modbus_rtu)
 				main_layout.addWidget(button_box)
 				self.setLayout(main_layout)
-				self.setGeometry(100, 100, 600, 400)
+				# self.setGeometry(100, 100, 600, 400)
 
 		def store(self):
-				obj_db_management = DatabaseManagement()
-				connection_string = "COMPORT:" + self.controller_com_port.text() + ";" +\
-				"BAUDRATE:" + self.controller_baudrate.currentText() + ";" +\
-				"PARITY:" + self.controller_parity.currentText() + ";" +\
-				"DATABITS:" + self.controller_data_bits.currentText() + ";" +\
-				"STOPBITS:" + self.controller_stop_bits.currentText()+ ";"
+				try:
+						obj_db_management = DatabaseManagement()
+						connection_string = "COMPORT:" + self.controller_com_port.text() + ";" + \
+																"BAUDRATE:" + self.controller_baudrate.currentText() + ";" + \
+																"PARITY:" + self.controller_parity.currentText() + ";" + \
+																"DATABITS:" + self.controller_data_bits.currentText() + ";" + \
+																"STOPBITS:" + self.controller_stop_bits.currentText() + ";"
 
-				driver_index = obj_db_management.get_driver_index("Modbus RTU")
-				plc_index = obj_db_management.get_plc_index(self.controller_collection.currentText())
-				controller = (connection_string, driver_index[0][0], plc_index[0][0])
-				obj_db_management.create_connection(controller)
-				QMessageBox.question(self, 'Machine', "New connection added successfully",
-																					 QMessageBox.Ok)
-				self.close()
+						driver_index = obj_db_management.get_driver_index("Modbus RTU")
+						plc_index = obj_db_management.get_plc_index(self.controller_collection.currentText())
+						controller = (connection_string, driver_index[0][0], plc_index[0][0])
+						obj_db_management.create_connection(controller)
+						QMessageBox.information(self, 'Modbus RTU', "New connection added successfully",
+																 QMessageBox.Ok)
+						self.close()
+				except Exception  as err:
+						mb = QMessageBox()
+						mb.setIcon(mb.Icon.Warning)
+						mb.setText("{0}".format(err))
+						mb.setWindowTitle("Error occurred")
+						mb.exec_()
+
 		def cancel(self):
 				self.close()
 
+
 if __name__ == '__main__':
-		obj_db_management = DatabaseManagement(r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 		app = QApplication(sys.argv)
 
 		dialog = FrmAddModbusRtuConnection()

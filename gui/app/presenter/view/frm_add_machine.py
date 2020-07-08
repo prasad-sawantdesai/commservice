@@ -1,14 +1,12 @@
 import sys
 
 from PySide2.QtWidgets import QApplication, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QGroupBox, QLabel, \
-		QLineEdit, QRadioButton, QVBoxLayout, QMessageBox
+		QLineEdit, QMessageBox, QVBoxLayout
 
 from app.utilities.database_management import DatabaseManagement
 
 
 class FrmAddMachine(QDialog):
-		NumGridRows = 3
-		NumButtons = 4
 
 		def __init__(self):
 				super(FrmAddMachine, self).__init__()
@@ -20,8 +18,7 @@ class FrmAddMachine(QDialog):
 				self.form_layout_plc_selection = QFormLayout()
 				self.controller_collection = QComboBox()
 
-				obj_db_management = DatabaseManagement(
-								r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
+				obj_db_management = DatabaseManagement.get_instance()
 				controllers = obj_db_management.select_all_controllers()
 				for controller in controllers:
 						self.controller_collection.addItem(controller[1])
@@ -47,19 +44,27 @@ class FrmAddMachine(QDialog):
 				main_layout.addWidget(self.group_box_machine_info)
 				main_layout.addWidget(button_box)
 				self.setLayout(main_layout)
-				self.setGeometry(100, 100, 600, 400)
+				# self.setGeometry(100, 100, 600, 400)
 
 		def store(self):
-				obj_db_management = DatabaseManagement(
-								r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
-				plc_index = obj_db_management.get_plc_index(self.controller_collection.currentText())
-				machine = (self.machine_name.text(), self.machine_manual_id.text(), plc_index[0][0])
-				obj_db_management.create_machine(machine)
-				QMessageBox.question(self, 'Machine', "New machine added successfully",
-																					 QMessageBox.Ok)
-				self.close()
+				try:
+						obj_db_management = DatabaseManagement.get_instance()
+						plc_index = obj_db_management.get_plc_index(self.controller_collection.currentText())
+						machine = (self.machine_name.text(), self.machine_manual_id.text(), plc_index[0][0])
+						obj_db_management.create_machine(machine)
+						QMessageBox.information(self, 'Machine', "New machine added successfully",
+																 QMessageBox.Ok)
+						self.close()
+				except Exception  as err:
+						mb = QMessageBox()
+						mb.setIcon(mb.Icon.Warning)
+						mb.setText("{0}".format(err))
+						mb.setWindowTitle("Error occurred")
+						mb.exec_()
+
 		def cancel(self):
 				self.close()
+
 
 if __name__ == '__main__':
 

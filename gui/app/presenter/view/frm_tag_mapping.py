@@ -1,8 +1,8 @@
 import sys
-from PySide2 import QtWidgets
 
+from PySide2 import QtWidgets
 from PySide2.QtWidgets import QApplication, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QGroupBox, QLabel, \
-		QLineEdit, QRadioButton, QVBoxLayout, QListWidget
+		QVBoxLayout, QMessageBox
 
 from app.utilities.database_management import DatabaseManagement
 
@@ -21,8 +21,7 @@ class FrmTagMapping(QDialog):
 				self.group_box_tag_group_selection = QGroupBox("Tag group Selection")
 				self.form_layout_tag_group_selection = QFormLayout()
 				self.tag_group_collection = QComboBox()
-				obj_db_management = DatabaseManagement(
-								r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice1.db")
+				obj_db_management = DatabaseManagement.get_instance()
 				tag_groups = obj_db_management.select_all_tag_groups()
 				for tag_group in tag_groups:
 						self.tag_group_collection.addItem(str(tag_group[1]))
@@ -64,27 +63,13 @@ class FrmTagMapping(QDialog):
 				self.update_buttons_status()
 				self.connections()
 				tags = []
-				obj_db_management = DatabaseManagement(
-								r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice1.db")
+				obj_db_management = DatabaseManagement.get_instance()
 				received_tags = obj_db_management.select_all_tags()
 				for tag in received_tags:
 						tags.append(tag[1])
 
 				self.addAvailableItems(tags)
 				self.group_box_tag_definition.setLayout(lay)
-
-
-				# view attached tags
-				# self.group_box_tag_view = QGroupBox("Tag view")
-				# self.form_layout_tag_view = QFormLayout()
-				# self.list_tag_view = QListWidget()
-				# obj_db_management = DatabaseManagement(
-				# 				r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice1.db")
-				# tags = obj_db_management.select_all_tag_mapping()
-				# for tag in tags:
-				# 		self.tag_group_collection.addItem(tag[1])
-				# self.form_layout_tag_view.addRow(QLabel("Tag view:"), self.list_tag_view)
-				# self.group_box_tag_view.setLayout(self.form_layout_tag_view)
 
 				button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 				button_box.accepted.connect(self.store)
@@ -94,30 +79,37 @@ class FrmTagMapping(QDialog):
 				main_layout.addWidget(self.group_box_tag_group_selection)
 				main_layout.addWidget(self.group_box_tag_definition)
 
-				# main_layout.addWidget(self.group_box_tag_view)
-
 				main_layout.addWidget(button_box)
 				self.setLayout(main_layout)
 
 		def store(self):
-				#TOdo write storing code with new database
-				obj_db_management = DatabaseManagement(
-								r"C:\KBData\Data\Development\iot_gui_development\sqlite_db_making\commservice1.db")
-				plc_index = obj_db_management.get_plc_index(self.tag_group_collection.currentText())
-				machine = (self.machine_name.text(), self.machine_manual_id.text(), plc_index[0][0])
-				obj_db_management.create_machine(machine)
+				try:
+						obj_db_management = DatabaseManagement.get_instance()
+						tag_group_index = obj_db_management.get_tag_group_index(self.tag_group_collection.currentText())
+						for selectedItem in self.get_right_elements():
+								tag_index = obj_db_management.get_tag_index(selectedItem)
+								mapping = (int(tag_group_index[0][0]), tag_index[0][0])
+								obj_db_management.create_tag_mapping(mapping)
+
+						QMessageBox.information(self, 'Tag Mapping', "Tag mapping done successfully",
+																 QMessageBox.Ok)
+				except Exception  as err:
+						mb = QMessageBox()
+						mb.setIcon(mb.Icon.Warning)
+						mb.setText("{0}".format(err))
+						mb.setWindowTitle("Error occurred")
+						mb.exec_()
+				self.close()
 
 		def cancel(self):
 				self.close()
 
-
 		def update_buttons_status(self):
 				self.mBtnUp.setDisabled(not bool(self.mOuput.selectedItems()) or self.mOuput.currentRow() == 0)
 				self.mBtnDown.setDisabled(
-						not bool(self.mOuput.selectedItems()) or self.mOuput.currentRow() == (self.mOuput.count() - 1))
+								not bool(self.mOuput.selectedItems()) or self.mOuput.currentRow() == (self.mOuput.count() - 1))
 				self.mBtnMoveToAvailable.setDisabled(not bool(self.mInput.selectedItems()) or self.mOuput.currentRow() == 0)
 				self.mBtnMoveToSelected.setDisabled(not bool(self.mOuput.selectedItems()))
-
 
 		def connections(self):
 				self.mInput.itemSelectionChanged.connect(self.update_buttons_status)
@@ -129,28 +121,23 @@ class FrmTagMapping(QDialog):
 				self.mBtnUp.clicked.connect(self.on_mBtnUp_clicked)
 				self.mBtnDown.clicked.connect(self.on_mBtnDown_clicked)
 
-
 		# @QtCore.pyqtSlot()
 		def on_mBtnMoveToAvailable_clicked(self):
 				self.mOuput.addItem(self.mInput.takeItem(self.mInput.currentRow()))
 
-
 		# @QtCore.pyqtSlot()
 		def on_mBtnMoveToSelected_clicked(self):
 				self.mInput.addItem(self.mOuput.takeItem(self.mOuput.currentRow()))
-
 
 		# @QtCore.pyqtSlot()
 		def on_mButtonToAvailable_clicked(self):
 				while self.mOuput.count() > 0:
 						self.mInput.addItem(self.mOuput.takeItem(0))
 
-
 		# @QtCore.pyqtSlot()
 		def on_mButtonToSelected_clicked(self):
 				while self.mInput.count() > 0:
 						self.mOuput.addItem(self.mInput.takeItem(0))
-
 
 		# @QtCore.pyqtSlot()
 		def on_mBtnUp_clicked(self):
@@ -159,7 +146,6 @@ class FrmTagMapping(QDialog):
 				self.mOuput.insertItem(row - 1, currentItem)
 				self.mOuput.setCurrentRow(row - 1)
 
-
 		# @QtCore.pyqtSlot()
 		def on_mBtnDown_clicked(self):
 				row = self.mOuput.currentRow()
@@ -167,10 +153,8 @@ class FrmTagMapping(QDialog):
 				self.mOuput.insertItem(row + 1, currentItem)
 				self.mOuput.setCurrentRow(row + 1)
 
-
 		def addAvailableItems(self, items):
 				self.mInput.addItems(items)
-
 
 		def get_left_elements(self):
 				r = []
@@ -179,13 +163,14 @@ class FrmTagMapping(QDialog):
 						r.append(it.text())
 				return r
 
-
 		def get_right_elements(self):
 				r = []
 				for i in range(self.mOuput.count()):
 						it = self.mOuput.item(i)
 						r.append(it.text())
 				return r
+
+
 if __name__ == '__main__':
 
 		app = QApplication(sys.argv)

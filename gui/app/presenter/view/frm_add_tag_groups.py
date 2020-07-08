@@ -1,14 +1,12 @@
 import sys
 
 from PySide2.QtWidgets import QApplication, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QGroupBox, QLabel, \
-		QLineEdit, QRadioButton, QVBoxLayout, QMessageBox
+		QLineEdit, QMessageBox, QVBoxLayout
 
 from app.utilities.database_management import DatabaseManagement
 
 
 class FrmTagGroups(QDialog):
-		NumGridRows = 3
-		NumButtons = 4
 
 		def __init__(self):
 				super(FrmTagGroups, self).__init__()
@@ -16,9 +14,10 @@ class FrmTagGroups(QDialog):
 				self.setWindowTitle("Add tag groups")
 
 				# PLC Selection
-				self.group_box_tag_group = QGroupBox("Ta group")
+				self.group_box_tag_group = QGroupBox("Tag group")
 				self.form_layout_tag_group = QFormLayout()
-
+				self.tag_group_name = QLineEdit()
+				self.form_layout_tag_group.addRow(QLabel("Name:"), self.tag_group_name)
 				self.controller_collection = QComboBox()
 				obj_db_management = DatabaseManagement()
 				controllers = obj_db_management.select_all_controllers()
@@ -53,15 +52,21 @@ class FrmTagGroups(QDialog):
 				self.setLayout(main_layout)
 
 		def store(self):
-				obj_db_management = DatabaseManagement(
-								r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
-				plc_index = obj_db_management.get_plc_index(self.controller_collection.currentText())
-				machine_index = obj_db_management.get_machine_index(self.machine_collection.currentText())
-				tag_group = (plc_index, machine_index, self.collection_method.text(), self.collection_type.text())
-				obj_db_management.create_tag_group(tag_group)
-				QMessageBox.question(self, 'Tag groups', "Tag group added successfully",
-														 QMessageBox.Ok)
-				self.close()
+				try:
+						obj_db_management = DatabaseManagement.get_instance()
+						plc_index = obj_db_management.get_plc_index(self.controller_collection.currentText())
+						machine_index = obj_db_management.get_machine_index(self.machine_collection.currentText())
+						tag_group = (self.tag_group_name.text(), plc_index[0][0], machine_index[0][0], int(self.collection_method.text()), self.collection_type.text())
+						obj_db_management.create_tag_group(tag_group)
+						QMessageBox.information(self, 'Tag groups', "Tag group added successfully",
+																 QMessageBox.Ok)
+						self.close()
+				except Exception  as err:
+						mb = QMessageBox()
+						mb.setIcon(mb.Icon.Warning)
+						mb.setText("{0}".format(err))
+						mb.setWindowTitle("Error occurred")
+						mb.exec_()
 
 		def cancel(self):
 				self.close()
@@ -76,9 +81,6 @@ class FrmTagGroups(QDialog):
 
 
 if __name__ == '__main__':
-		obj_db_management = DatabaseManagement(
-						r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
-
 		app = QApplication(sys.argv)
 
 		dialog = FrmTagGroups()

@@ -1,7 +1,7 @@
 import sys
 
 from PySide2.QtWidgets import QApplication, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QGroupBox, QLabel, \
-		QLineEdit, QRadioButton, QVBoxLayout, QMessageBox
+		QLineEdit, QMessageBox, QVBoxLayout
 
 from app.utilities.database_management import DatabaseManagement
 
@@ -50,28 +50,33 @@ class FrmAddTags(QDialog):
 				main_layout.addWidget(self.group_box_tag_info)
 				main_layout.addWidget(button_box)
 				self.setLayout(main_layout)
-				# self.setGeometry(100, 100, 600, 400)
 
 		def store(self):
-				obj_db_management = DatabaseManagement()
-				register_type_index = obj_db_management.get_register_type_index(self.register_types.currentText())
-				tag = (self.tag_name.text(),
+				try:
+						obj_db_management = DatabaseManagement.get_instance()
+						register_type_index = obj_db_management.get_register_type_index(self.register_types.currentText())
+						tag = (self.tag_name.text(),
 									 register_type_index[0][0],
 									 self.address.text(),
 									 self.scaling.text(),
 									 self.data_types.currentText(),
 									 self.data_size.text())
-				obj_db_management.create_tags(tag)
-				QMessageBox.question(self, 'Tags', "Tag information added successfully",
-																					 QMessageBox.Ok)
-				self.close()
+						obj_db_management.create_tags(tag)
+						QMessageBox.information(self, 'Tags', "New Tag information added successfully",
+																 QMessageBox.Ok)
+						self.close()
+				except Exception  as err:
+						mb = QMessageBox()
+						mb.setIcon(mb.Icon.Warning)
+						mb.setText("{0}".format(err))
+						mb.setWindowTitle("Error occurred")
+						mb.exec_()
+
 		def cancel(self):
 				self.close()
 
 
 if __name__ == '__main__':
-		obj_db_management = DatabaseManagement(
-						r"/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice.db")
 		app = QApplication(sys.argv)
 
 		dialog = FrmAddTags()
