@@ -1,5 +1,6 @@
 #ifndef CONFIGREADER_H
 #define CONFIGREADER_H
+#include "TagGroupConfig.h"
 #include <string>
 using namespace std;
 class ConfigReader
@@ -9,7 +10,8 @@ class ConfigReader
         ConfigReader();
         /** Default destructor */
         virtual ~ConfigReader();
-        int Connect(string);
+        TagGroupConfig ReadConfiguration(string);
+
     protected:
 
     private:

@@ -42,13 +42,16 @@
 1593202914 /home/pi/futuremaker/application/commservice/commservice/commservice/include/ConfigReader.h
 	<string>
 
-1594065736 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/ConfigReader.cpp
+1594404215 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/ConfigReader.cpp
 	"ConfigReader.h"
 	<stdio.h>
 	<sqlite3.h>
-	<string>
+	<string.h>
+	<sstream>
+	"TagGroupConfig.h"
 
-1593452898 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/ConfigReader.h
+1594394370 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/ConfigReader.h
+	"TagGroupConfig.h"
 	<string>
 
 1593628266 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/LibModbusClient.cpp
@@ -77,20 +80,25 @@
 1575875089 /usr/include/modbus/modbus-rtu.h
 	"modbus.h"
 
-1594065537 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/main.cpp
+1594412699 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/main.cpp
 	<iostream>
-	"LibModbusClient.h"
 	<cstdlib>
 	<pthread.h>
 	<time.h>
+	<cstdlib>
 	"ConfigReader.h"
 	"DatabaseWriter.h"
+	"TagGroupConfig.h"
+	"LibModbusClient.h"
+	<vector>
+	<string>
+	<unistd.h>
 
-1594065641 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/DatabaseWriter.cpp
+1594413861 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/DatabaseWriter.cpp
 	"DatabaseWriter.h"
 	<mongoc.h>
 
-1594062346 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/DatabaseWriter.h
+1594412716 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/DatabaseWriter.h
 	<string>
 
 1594064124 /usr/local/include/libmongoc-1.0/mongoc.h
@@ -612,4 +620,10 @@
 	"mongoc-macros.h"
 	"mongoc-ssl.h"
 	"mongoc-stream.h"
+
+1594393423 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/TagGroupConfig.cpp
+	"TagGroupConfig.h"
+
+1594403567 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagGroupConfig.h
+	<string>
 

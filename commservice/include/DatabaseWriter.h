@@ -8,7 +8,7 @@ class DatabaseWriter
     public:
         DatabaseWriter();
         virtual ~DatabaseWriter();
-        int Connect(string);
+        int upload_data(string, const char *, int);
     protected:
 
     private:

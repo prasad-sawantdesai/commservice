@@ -11,7 +11,7 @@ DatabaseWriter::~DatabaseWriter()
 {
     //dtor
 }
-int DatabaseWriter::Connect(string url)
+int DatabaseWriter::upload_data(string url, const char * name, int value)
 {
    const char *uri_string = url.c_str(); //"mongodb://localhost:27017";
    mongoc_uri_t *uri;
@@ -42,8 +42,8 @@ int DatabaseWriter::Connect(string url)
 
    mongoc_client_set_appname (client, "connect-example");
 
-      database = mongoc_client_get_database (client, "db_name");
-   collection = mongoc_client_get_collection (client, "db_name", "coll_name");
+      database = mongoc_client_get_database (client, "x_board");
+   collection = mongoc_client_get_collection (client, "x_board", "collection");
 
    /*
     * Do work. This example pings the database, prints the result as JSON and
@@ -62,7 +62,7 @@ int DatabaseWriter::Connect(string url)
    str = bson_as_json (&reply, NULL);
    printf ("%s\n", str);
 
-   insert = BCON_NEW ("hello", BCON_UTF8 ("world"));
+   insert = BCON_NEW (name, BCON_INT32 (value));
 
    if (!mongoc_collection_insert_one (collection, insert, NULL, NULL, &error)) {
       fprintf (stderr, "%s\n", error.message);
