@@ -42,7 +42,7 @@
 1593202914 /home/pi/futuremaker/application/commservice/commservice/commservice/include/ConfigReader.h
 	<string>
 
-1594404215 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/ConfigReader.cpp
+1594672233 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/ConfigReader.cpp
 	"ConfigReader.h"
 	<stdio.h>
 	<sqlite3.h>
@@ -50,7 +50,7 @@
 	<sstream>
 	"TagGroupConfig.h"
 
-1594394370 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/ConfigReader.h
+1594655030 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/ConfigReader.h
 	"TagGroupConfig.h"
 	<string>
 
@@ -80,7 +80,7 @@
 1575875089 /usr/include/modbus/modbus-rtu.h
 	"modbus.h"
 
-1594412699 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/main.cpp
+1594669528 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/main.cpp
 	<iostream>
 	<cstdlib>
 	<pthread.h>
@@ -94,7 +94,7 @@
 	<string>
 	<unistd.h>
 
-1594413861 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/DatabaseWriter.cpp
+1594441138 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/DatabaseWriter.cpp
 	"DatabaseWriter.h"
 	<mongoc.h>
 
@@ -624,6 +624,13 @@
 1594393423 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/TagGroupConfig.cpp
 	"TagGroupConfig.h"
 
-1594403567 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagGroupConfig.h
+1594665361 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagGroupConfig.h
+	"TagConfig.h"
+	<string>
+
+1594654877 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/TagConfig.cpp
+	"TagConfig.h"
+
+1594668525 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagConfig.h
 	<string>
 

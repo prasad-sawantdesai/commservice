@@ -49,11 +49,13 @@
 		<Unit filename="include/ConfigReader.h" />
 		<Unit filename="include/DatabaseWriter.h" />
 		<Unit filename="include/LibModbusClient.h" />
+		<Unit filename="include/TagConfig.h" />
 		<Unit filename="include/TagGroupConfig.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/ConfigReader.cpp" />
 		<Unit filename="src/DatabaseWriter.cpp" />
 		<Unit filename="src/LibModbusClient.cpp" />
+		<Unit filename="src/TagConfig.cpp" />
 		<Unit filename="src/TagGroupConfig.cpp" />
 		<Extensions />
 	</Project>

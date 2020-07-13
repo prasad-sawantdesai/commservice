@@ -60,10 +60,10 @@ void *modbustcp(void *input)
 
     time_t my_time = time(NULL);
     uint16_t* holding_reg = obj.ReadHoldingRegisters(0, 20);
-const char * sample_tag = "sampletag";
+    const char * sample_tag = "sampletag";
     for (int i=0; i < 5; i++)
     {
-          DatabaseWriter objDatabaseWriter = DatabaseWriter();
+        DatabaseWriter objDatabaseWriter = DatabaseWriter();
         objDatabaseWriter.upload_data("mongodb://localhost:27017", sample_tag, holding_reg[i]);
         printf("%s :holding register[%d]=%d (0x%X)\n",ctime(&my_time),i, holding_reg[i], holding_reg[i]);
     }
@@ -156,44 +156,74 @@ int main ()
 {
     //Read configuration database
     ConfigReader objConfigReader = ConfigReader();
-    TagGroupConfig objTagGroupConfig = objConfigReader.ReadConfiguration("/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice_example.db");
+    TagGroupConfig* TagGroupCollection;
+    TagGroupCollection = objConfigReader.ReadConfiguration("/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice_example.db");
 
-    printf("%s\n",objTagGroupConfig.TagGroupName.c_str());
-    printf("%d\n",objTagGroupConfig.CollectionMethod);
-    printf("%s\n",objTagGroupConfig.CollectionType.c_str());
-    printf("%s\n",objTagGroupConfig.PLCName.c_str());
-    printf("%s\n",objTagGroupConfig.PLCDescription.c_str());
-    printf("%d\n",objTagGroupConfig.SlaveID);
-    printf("%s\n",objTagGroupConfig.ConnectionString.c_str());
-    printf("%s\n",objTagGroupConfig.DriverName.c_str());
-    printf("%s\n",objTagGroupConfig.DriverFormat.c_str());
+    printf("%s\n",TagGroupCollection[0].TagGroupName.c_str());
+    printf("%d\n",TagGroupCollection[0].CollectionMethod);
+    printf("%s\n",TagGroupCollection[0].CollectionType.c_str());
+    printf("%s\n",TagGroupCollection[0].PLCName.c_str());
+    printf("%s\n",TagGroupCollection[0].PLCDescription.c_str());
+    printf("%d\n",TagGroupCollection[0].SlaveID);
+    printf("%s\n",TagGroupCollection[0].ConnectionString.c_str());
+    printf("%s\n",TagGroupCollection[0].DriverName.c_str());
+    printf("%s\n",TagGroupCollection[0].DriverFormat.c_str());
 
+    int  TagID;
+    string TagName;
+    string TagRegisterType;
+    int RangeUpper;
+    int RangeLower;
+    int TagAddress;
+    int TagScaling;
+    int TagDataType;
+    int TagDataSize;
+    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagID);
+    printf("%s\n",TagGroupCollection[0].TagConfigCollection[0].TagName.c_str());
+    printf("%s\n",TagGroupCollection[0].TagConfigCollection[0].TagRegisterType.c_str());
+    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].RangeUpper);
+    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].RangeLower);
+    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagAddress);
+    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagScaling);
+    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagDataType);
+    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagDataSize);
+
+    printf("%s\n",TagGroupCollection[1].TagGroupName.c_str());
+    printf("%d\n",TagGroupCollection[1].CollectionMethod);
+    printf("%s\n",TagGroupCollection[1].CollectionType.c_str());
+    printf("%s\n",TagGroupCollection[1].PLCName.c_str());
+    printf("%s\n",TagGroupCollection[1].PLCDescription.c_str());
+    printf("%d\n",TagGroupCollection[1].SlaveID);
+    printf("%s\n",TagGroupCollection[1].ConnectionString.c_str());
+    printf("%s\n",TagGroupCollection[1].DriverName.c_str());
+    printf("%s\n",TagGroupCollection[1].DriverFormat.c_str());
     pthread_t threads[NUM_THREADS];
     while(1)
     {
         int i=0;
-        if (objTagGroupConfig.DriverName.compare("Modbus TCP") ==0)
+
+        if (TagGroupCollection[1].DriverName.compare("Modbus TCP") ==0)
         {
             struct structModbusTCP *modbusTCPConfig = (struct structModbusTCP *)malloc(sizeof(struct structModbusTCP));
-            vector<string> v{split(objTagGroupConfig.ConnectionString, ';')};
+            vector<string> v{split(TagGroupCollection[1].ConnectionString, ';')};
             vector<string> v1{split(v[0], ':')};
             vector<string> v2{split(v[1], ':')};
 
             modbusTCPConfig->ip_address = v1[1].c_str();
             modbusTCPConfig->port = atoi(v2[1].c_str());
-            modbusTCPConfig->slaveid = objTagGroupConfig.SlaveID;
+            modbusTCPConfig->slaveid = TagGroupCollection[1].SlaveID;
             int rc = pthread_create(&threads[i], NULL, modbustcp, (void *)modbusTCPConfig);
         }
-        if (objTagGroupConfig.DriverName.compare("Modbus RTU") ==0)
+        if (TagGroupCollection[0].DriverName.compare("Modbus RTU") ==0)
         {
             int rc = pthread_create(&threads[i], NULL, modbusrtu, (void *)i);
         }
 
         sleep(1);
     }
-pthread_exit(NULL);
-
-    //connect to mongo db
+    pthread_exit(NULL);
+}
+//connect to mongo db
 
 
 
@@ -211,8 +241,8 @@ pthread_exit(NULL);
 //            exit(-1);
 //        }
 //    }
-    pthread_exit(NULL);
-}
+//    pthread_exit(NULL);
+//}
 
 //    int *array = new int[number];
 //
