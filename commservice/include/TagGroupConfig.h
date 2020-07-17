@@ -1,6 +1,6 @@
 #ifndef TAGGROUPCONFIG_H
 #define TAGGROUPCONFIG_H
-
+#include <vector>
 #include "TagConfig.h"
 #include <string>
 using namespace std;
@@ -11,7 +11,7 @@ class TagGroupConfig
         TagGroupConfig();
         virtual ~TagGroupConfig();
 
-        string  TagGroupID;
+        int  TagGroupID;
         string  TagGroupName;
         int CollectionMethod;
         string CollectionType;
@@ -22,7 +22,7 @@ class TagGroupConfig
         string DriverName;
         string DriverFormat;
 
-        TagConfig* TagConfigCollection;
+        vector<TagConfig> TagConfigCollection;
     protected:
 
     private:

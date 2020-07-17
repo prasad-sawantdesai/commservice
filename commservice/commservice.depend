@@ -42,15 +42,17 @@
 1593202914 /home/pi/futuremaker/application/commservice/commservice/commservice/include/ConfigReader.h
 	<string>
 
-1594672233 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/ConfigReader.cpp
+1595012648 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/ConfigReader.cpp
 	"ConfigReader.h"
 	<stdio.h>
 	<sqlite3.h>
-	<string.h>
+	<string>
 	<sstream>
+	<vector>
+	<iostream>
 	"TagGroupConfig.h"
 
-1594655030 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/ConfigReader.h
+1594985673 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/ConfigReader.h
 	"TagGroupConfig.h"
 	<string>
 
@@ -80,7 +82,7 @@
 1575875089 /usr/include/modbus/modbus-rtu.h
 	"modbus.h"
 
-1594669528 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/main.cpp
+1595018172 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/main.cpp
 	<iostream>
 	<cstdlib>
 	<pthread.h>
@@ -93,12 +95,15 @@
 	<vector>
 	<string>
 	<unistd.h>
+	<thread>
 
-1594441138 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/DatabaseWriter.cpp
+1595018207 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/DatabaseWriter.cpp
 	"DatabaseWriter.h"
 	<mongoc.h>
 
-1594412716 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/DatabaseWriter.h
+1595016883 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/DatabaseWriter.h
+	<bson/bson.h>
+	<mongoc/mongoc.h>
 	<string>
 
 1594064124 /usr/local/include/libmongoc-1.0/mongoc.h
@@ -624,13 +629,14 @@
 1594393423 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/TagGroupConfig.cpp
 	"TagGroupConfig.h"
 
-1594665361 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagGroupConfig.h
+1594988759 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagGroupConfig.h
+	<vector>
 	"TagConfig.h"
 	<string>
 
 1594654877 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/TagConfig.cpp
 	"TagConfig.h"
 
-1594668525 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagConfig.h
+1594989207 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagConfig.h
 	<string>
 

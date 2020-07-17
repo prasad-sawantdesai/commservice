@@ -16,7 +16,7 @@ public:
     int RangeLower;
     int TagAddress;
     int TagScaling;
-    int TagDataType;
+    string TagDataType;
     int TagDataSize;
 
 protected:

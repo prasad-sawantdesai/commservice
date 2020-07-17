@@ -10,7 +10,7 @@ class ConfigReader
         ConfigReader();
         /** Default destructor */
         virtual ~ConfigReader();
-        TagGroupConfig* ReadConfiguration(string);
+        vector<TagGroupConfig> ReadConfiguration(string);
 
     protected:
 

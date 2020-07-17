@@ -10,82 +10,202 @@
 #include <vector>
 #include <string>
 #include <unistd.h>
+#include <thread>
 using namespace std;
 
 #define NUM_THREADS 1
-struct structModbusTCP
+
+const vector<string> split(const string& s, const char& c)
 {
-    const char* ip_address;
-    int port;
-    int slaveid;
-};
-void *modbustcp(void *input)
-{
-    const char* ip_address;
-    int port;
-    int slaveid;
-    ip_address = ((struct structModbusTCP*)input)->ip_address;
-    port = ((struct structModbusTCP*)input)->port;
-    slaveid = ((struct structModbusTCP*)input)->slaveid;
+    string buff{""};
+    vector<string> v;
 
-    cout<<"Modbus client is connecting to :"<<slaveid<<endl;
-
-    LibModbusClient obj;
-
-    obj= obj.CreateTcpClient(ip_address,port);
-    obj.SetSlaveID(slaveid);
-    obj.connect();
-
-//    timeval curTime;
-//gettimeofday(&curTime, NULL);
-//int milli = curTime.tv_usec / 1000;
-//
-//char buffer [80];
-//strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", localtime(&curTime.tv_sec));
-//
-//char currentTime[84] = "";
-//sprintf(currentTime, "%s:%03d", buffer, milli);
-//printf("current time: %s \n", currentTime);
-
-//TagName
-//TagGroup
-//PLC
-//Protocol
-//IPAddress
-//Port
-//COM
-//Slave ID
-//RawValue
-//Value
-
-    time_t my_time = time(NULL);
-    uint16_t* holding_reg = obj.ReadHoldingRegisters(0, 20);
-    const char * sample_tag = "sampletag";
-    for (int i=0; i < 5; i++)
+    for(auto n:s)
     {
-        DatabaseWriter objDatabaseWriter = DatabaseWriter();
-        objDatabaseWriter.upload_data("mongodb://localhost:27017", sample_tag, holding_reg[i]);
-        printf("%s :holding register[%d]=%d (0x%X)\n",ctime(&my_time),i, holding_reg[i], holding_reg[i]);
+        if(n != c) buff+=n;
+        else if(n == c && buff != "")
+        {
+            v.push_back(buff);
+            buff = "";
+        }
     }
+    if(buff != "") v.push_back(buff);
 
-    uint16_t* input_reg = obj.ReadInputRegisters(0, 20);
-
-    for (int i=0; i < 5; i++)
-    {
-        printf("%s :input register[%d]=%d (0x%X)\n",ctime(&my_time),i, input_reg[i], input_reg[i]);
-    }
-
-//    uint8_t* input_coils = obj.ReadInputCoils(0, 2);
-//
-//    for (int i=0; i < 5; i++)
-//    {
-//        printf("%s :input coils[%d]=%d (0x%X)\n",ctime(&my_time),i, input_coils[i], input_coils[i]);
-//    }
-    obj.close();
-    return 0;
+    return v;
 }
 
+int main ()
+{
+    //Read configuration database
+    vector<TagGroupConfig>::iterator TagGroupConfigIterator;
+    vector<TagConfig>::iterator TagConfigIterator;
+    vector<TagGroupConfig> TagGroupConfigCollection;
 
+    ConfigReader objConfigReader = ConfigReader();
+    DatabaseWriter objDatabaseWriter = DatabaseWriter();
+
+    TagGroupConfigCollection = objConfigReader.ReadConfiguration("/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice_example.db");
+    cout<<"---------Reading tag group configuration----------"<< endl ;
+
+    for (TagGroupConfigIterator = TagGroupConfigCollection.begin(); TagGroupConfigIterator != TagGroupConfigCollection.end(); ++TagGroupConfigIterator)
+    {
+        cout <<"TagGroupID :"<< TagGroupConfigIterator->TagGroupID<< endl ;
+        cout <<"TagGroupName :"<< TagGroupConfigIterator->TagGroupName<< endl ;
+        cout <<"CollectionMethod :"<< TagGroupConfigIterator->CollectionMethod<< endl ;
+        cout <<"CollectionType :"<< TagGroupConfigIterator->CollectionType<< endl ;
+        cout <<"PLCName :"<< TagGroupConfigIterator->PLCName<< endl ;
+        cout <<"PLCDescription :"<< TagGroupConfigIterator->PLCDescription<< endl ;
+        cout <<"SlaveID :"<< TagGroupConfigIterator->SlaveID<< endl ;
+        cout <<"ConnectionString :"<< TagGroupConfigIterator->ConnectionString<< endl ;
+        cout <<"DriverName :"<< TagGroupConfigIterator->DriverName<< endl ;
+        cout <<"DriverFormat :"<< TagGroupConfigIterator->DriverFormat<< endl ;
+        cout << "Tags available in the group:" << endl ;
+
+        for (TagConfigIterator = TagGroupConfigIterator->TagConfigCollection.begin(); TagConfigIterator != TagGroupConfigIterator->TagConfigCollection.end(); ++TagConfigIterator)
+        {
+
+            cout <<"\tTagID :"<< TagConfigIterator->TagID<< endl ;
+            cout <<"\tTagName :"<< TagConfigIterator->TagName<< endl ;
+            cout <<"\tTagRegisterType :"<< TagConfigIterator->TagRegisterType<< endl ;
+            cout <<"\tRangeUpper :"<< TagConfigIterator->RangeUpper<< endl ;
+            cout <<"\tRangeLower :"<< TagConfigIterator->RangeLower<< endl ;
+            cout <<"\tTagAddress :"<< TagConfigIterator->TagAddress<< endl ;
+            cout <<"\tTagScaling :"<< TagConfigIterator->TagScaling<< endl ;
+            cout <<"\tTagDataType :"<< TagConfigIterator->TagDataType<< endl ;
+            cout <<"\tTagDataSize :"<< TagConfigIterator->TagDataSize<< endl ;
+            cout<<"\t-----------------------------"<< endl ;
+        }
+        cout<<"------------------------------------"<< endl ;
+    }
+
+    while(1)
+    {
+        for (TagGroupConfigIterator = TagGroupConfigCollection.begin(); TagGroupConfigIterator != TagGroupConfigCollection.end(); ++TagGroupConfigIterator)
+        {
+            if (TagGroupConfigIterator->DriverName.compare("Modbus TCP") ==0)
+            {
+                //IPADDRESS:192.168.1.100;PORT:502
+                vector<string> splitted_connectionstring{split(TagGroupConfigIterator->ConnectionString, ';')};
+                vector<string> ipaddress{split(splitted_connectionstring[0], ':')};
+                vector<string> port{split(splitted_connectionstring[1], ':')};
+                LibModbusClient obj;
+
+                obj= obj.CreateTcpClient(ipaddress[1].c_str(),atoi(port[1].c_str()));
+                obj.SetSlaveID(TagGroupConfigIterator->SlaveID);
+                int connection_success = obj.connect();
+
+                if (connection_success ==0)
+                {
+                    for (TagConfigIterator = TagGroupConfigIterator->TagConfigCollection.begin(); TagConfigIterator != TagGroupConfigIterator->TagConfigCollection.end(); ++TagConfigIterator)
+                    {
+                        cout <<"Reading tag :"<< TagConfigIterator->TagName<< " from "<< TagGroupConfigIterator->PLCName << " using " << TagGroupConfigIterator->DriverName<< " ["<<TagGroupConfigIterator->ConnectionString <<"] "<< endl ;
+                        if (TagConfigIterator->TagRegisterType.compare("Holding registers") ==0)
+                        {
+                            uint16_t* holding_reg = obj.ReadHoldingRegisters(TagConfigIterator->TagAddress, 1);
+                            cout<<"Value read :"<<holding_reg[0]<<endl;
+                            time_t current_time = time(NULL);
+                            bson_t *doc;
+                            bson_oid_t oid;
+                            doc = bson_new ();
+                            bson_oid_init (&oid, NULL);
+                            BSON_APPEND_OID (doc, "_id", &oid);
+                            BSON_APPEND_UTF8 (doc, "Time", ctime(&current_time));
+                            BSON_APPEND_UTF8 (doc, "TagGroupName", TagGroupConfigIterator->TagGroupName.c_str());
+                            BSON_APPEND_UTF8 (doc, "TagName", TagConfigIterator->TagName.c_str());
+                            BSON_APPEND_INT32 (doc, "RawValue", holding_reg[0]);
+                            BSON_APPEND_UTF8 (doc, "PLCName", TagGroupConfigIterator->PLCName.c_str());
+                            BSON_APPEND_UTF8 (doc, "Protocol", TagGroupConfigIterator->DriverName.c_str());
+                            BSON_APPEND_UTF8 (doc, "ConnectionString", TagGroupConfigIterator->ConnectionString.c_str());
+                            BSON_APPEND_INT32 (doc, "SlaveID", TagGroupConfigIterator->SlaveID);
+                            BSON_APPEND_INT32 (doc, "TagAddress", TagConfigIterator->TagAddress);
+
+
+                            objDatabaseWriter.upload_data("mongodb://localhost:27017", doc);
+                        }
+                        if (TagConfigIterator->TagRegisterType.compare("Input Registers") ==0)
+                        {
+                            uint16_t* input_reg = obj.ReadInputRegisters(TagConfigIterator->TagAddress, 1);
+                            cout<<"Value read :"<<input_reg[0]<<endl;
+                        }
+                        if (TagConfigIterator->TagRegisterType.compare("Output coils") ==0)
+                        {
+                            uint8_t* coil = obj.ReadInputCoils(TagConfigIterator->TagAddress, 1);
+                            cout<<"Value read :"<<coil[0]<<endl;
+                        }
+                        if (TagConfigIterator->TagRegisterType.compare("Discrete inputs") ==0)
+                        {
+                            uint8_t* discrete_input = obj.ReadInputCoils(TagConfigIterator->TagAddress, 1);
+                            cout<<"Value read :"<<discrete_input[0]<<endl;
+                        }
+                    }
+
+                }
+                if(connection_success ==0)
+                    obj.close();
+            }
+            if (TagGroupConfigIterator->DriverName.compare("Modbus RTU") ==0)
+            {
+                //COMPORT:COM3;BAUDRATE:19200;PARITY:NONE;BYTESIZE:8;STOPBITS:1
+                //"/dev/ttyUSB0",19200, 'N', 8, 1
+                vector<string> splitted_connectionstring{split(TagGroupConfigIterator->ConnectionString, ';')};
+                vector<string> comport{split(splitted_connectionstring[0], ':')};
+                vector<string> baudrate{split(splitted_connectionstring[1], ':')};
+                vector<string> parity{split(splitted_connectionstring[2], ':')};
+                vector<string> byte_size{split(splitted_connectionstring[3], ':')};
+                vector<string> stop_bits{split(splitted_connectionstring[4], ':')};
+                LibModbusClient obj;
+
+                obj= obj.CreateRtuClient(comport[1].c_str(),atoi(baudrate[1].c_str()),'N',atoi(byte_size[1].c_str()),atoi(stop_bits[1].c_str()));
+                obj.SetSlaveID(TagGroupConfigIterator->SlaveID);
+                int connection_success = obj.connect();
+
+                if (connection_success ==0)
+                {
+                    for (TagConfigIterator = TagGroupConfigIterator->TagConfigCollection.begin(); TagConfigIterator != TagGroupConfigIterator->TagConfigCollection.end(); ++TagConfigIterator)
+                    {
+                        cout <<"Reading tag :"<< TagConfigIterator->TagName<< " from "<< TagGroupConfigIterator->PLCName << " using " << TagGroupConfigIterator->DriverName<< " ["<<TagGroupConfigIterator->ConnectionString <<"] "<< endl ;
+                        if (TagConfigIterator->TagRegisterType.compare("Holding registers") ==0)
+                        {
+                            uint16_t* holding_reg = obj.ReadHoldingRegisters(TagConfigIterator->TagAddress, 1);
+                            cout<<"Value read :"<<holding_reg[0]<<endl;
+                        }
+                        if (TagConfigIterator->TagRegisterType.compare("Input Registers") ==0)
+                        {
+                            uint16_t* input_reg = obj.ReadInputRegisters(TagConfigIterator->TagAddress, 1);
+                            cout<<"Value read :"<<input_reg[0]<<endl;
+                        }
+                        if (TagConfigIterator->TagRegisterType.compare("Output coils") ==0)
+                        {
+                            uint8_t* coil = obj.ReadInputCoils(TagConfigIterator->TagAddress, 1);
+                            cout<<"Value read :"<<coil[0]<<endl;
+                        }
+                        if (TagConfigIterator->TagRegisterType.compare("Discrete inputs") ==0)
+                        {
+                            uint8_t* discrete_input = obj.ReadInputCoils(TagConfigIterator->TagAddress, 1);
+                            cout<<"Value read :"<<discrete_input[0]<<endl;
+                        }
+                        sleep(1);
+                    }
+
+                }
+                if(connection_success ==0)
+                    obj.close();
+            }
+
+        }
+        sleep(1);
+    }
+}
+
+//------------------------------------------END----------------------------
+
+void func_dummy(int N)
+{
+    for (int i = 0; i < N; i++)
+    {
+        cout << "Thread 1 :: callable => function pointer\n";
+    }
+}
 void *modbusrtu(void *slaveid)
 {
     int sid = (long)slaveid;
@@ -134,95 +254,79 @@ void *modbusrtu(void *slaveid)
     obj.close();
     return 0;
 }
-const vector<string> split(const string& s, const char& c)
+struct structModbusTCP
 {
-    string buff{""};
-    vector<string> v;
-
-    for(auto n:s)
-    {
-        if(n != c) buff+=n;
-        else if(n == c && buff != "")
-        {
-            v.push_back(buff);
-            buff = "";
-        }
-    }
-    if(buff != "") v.push_back(buff);
-
-    return v;
-}
-int main ()
+    const char* ip_address;
+    int port;
+    int slaveid;
+};
+void *modbustcp(void *input)
 {
-    //Read configuration database
-    ConfigReader objConfigReader = ConfigReader();
-    TagGroupConfig* TagGroupCollection;
-    TagGroupCollection = objConfigReader.ReadConfiguration("/home/ujjaini/prasad/commservice/git_repo/commservice/database/commservice_example.db");
+    const char* ip_address;
+    int port;
+    int slaveid;
+    ip_address = ((struct structModbusTCP*)input)->ip_address;
+    port = ((struct structModbusTCP*)input)->port;
+    slaveid = ((struct structModbusTCP*)input)->slaveid;
 
-    printf("%s\n",TagGroupCollection[0].TagGroupName.c_str());
-    printf("%d\n",TagGroupCollection[0].CollectionMethod);
-    printf("%s\n",TagGroupCollection[0].CollectionType.c_str());
-    printf("%s\n",TagGroupCollection[0].PLCName.c_str());
-    printf("%s\n",TagGroupCollection[0].PLCDescription.c_str());
-    printf("%d\n",TagGroupCollection[0].SlaveID);
-    printf("%s\n",TagGroupCollection[0].ConnectionString.c_str());
-    printf("%s\n",TagGroupCollection[0].DriverName.c_str());
-    printf("%s\n",TagGroupCollection[0].DriverFormat.c_str());
+    cout<<"Modbus client is connecting to :"<<slaveid<<endl;
 
-    int  TagID;
-    string TagName;
-    string TagRegisterType;
-    int RangeUpper;
-    int RangeLower;
-    int TagAddress;
-    int TagScaling;
-    int TagDataType;
-    int TagDataSize;
-    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagID);
-    printf("%s\n",TagGroupCollection[0].TagConfigCollection[0].TagName.c_str());
-    printf("%s\n",TagGroupCollection[0].TagConfigCollection[0].TagRegisterType.c_str());
-    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].RangeUpper);
-    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].RangeLower);
-    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagAddress);
-    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagScaling);
-    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagDataType);
-    printf("%d\n",TagGroupCollection[0].TagConfigCollection[0].TagDataSize);
+    LibModbusClient obj;
 
-    printf("%s\n",TagGroupCollection[1].TagGroupName.c_str());
-    printf("%d\n",TagGroupCollection[1].CollectionMethod);
-    printf("%s\n",TagGroupCollection[1].CollectionType.c_str());
-    printf("%s\n",TagGroupCollection[1].PLCName.c_str());
-    printf("%s\n",TagGroupCollection[1].PLCDescription.c_str());
-    printf("%d\n",TagGroupCollection[1].SlaveID);
-    printf("%s\n",TagGroupCollection[1].ConnectionString.c_str());
-    printf("%s\n",TagGroupCollection[1].DriverName.c_str());
-    printf("%s\n",TagGroupCollection[1].DriverFormat.c_str());
-    pthread_t threads[NUM_THREADS];
-    while(1)
+    obj= obj.CreateTcpClient(ip_address,port);
+    obj.SetSlaveID(slaveid);
+    obj.connect();
+
+//    timeval curTime;
+//gettimeofday(&curTime, NULL);
+//int milli = curTime.tv_usec / 1000;
+//
+//char buffer [80];
+//strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", localtime(&curTime.tv_sec));
+//
+//char currentTime[84] = "";
+//sprintf(currentTime, "%s:%03d", buffer, milli);
+//printf("current time: %s \n", currentTime);
+
+//TagName
+//TagGroup
+//PLC
+//Protocol
+//IPAddress
+//Port
+//COM
+//Slave ID
+//RawValue
+//Value
+
+    time_t my_time = time(NULL);
+    uint16_t* holding_reg = obj.ReadHoldingRegisters(0, 20);
+//    const char * sample_tag = "sampletag";
+    for (int i=0; i < 5; i++)
     {
-        int i=0;
-
-        if (TagGroupCollection[1].DriverName.compare("Modbus TCP") ==0)
-        {
-            struct structModbusTCP *modbusTCPConfig = (struct structModbusTCP *)malloc(sizeof(struct structModbusTCP));
-            vector<string> v{split(TagGroupCollection[1].ConnectionString, ';')};
-            vector<string> v1{split(v[0], ':')};
-            vector<string> v2{split(v[1], ':')};
-
-            modbusTCPConfig->ip_address = v1[1].c_str();
-            modbusTCPConfig->port = atoi(v2[1].c_str());
-            modbusTCPConfig->slaveid = TagGroupCollection[1].SlaveID;
-            int rc = pthread_create(&threads[i], NULL, modbustcp, (void *)modbusTCPConfig);
-        }
-        if (TagGroupCollection[0].DriverName.compare("Modbus RTU") ==0)
-        {
-            int rc = pthread_create(&threads[i], NULL, modbusrtu, (void *)i);
-        }
-
-        sleep(1);
+//        DatabaseWriter objDatabaseWriter = DatabaseWriter();
+//        objDatabaseWriter.upload_data("mongodb://localhost:27017", sample_tag, holding_reg[i]);
+        printf("%s :holding register[%d]=%d (0x%X)\n",ctime(&my_time),i, holding_reg[i], holding_reg[i]);
     }
-    pthread_exit(NULL);
+
+    uint16_t* input_reg = obj.ReadInputRegisters(0, 20);
+
+    for (int i=0; i < 5; i++)
+    {
+        printf("%s :input register[%d]=%d (0x%X)\n",ctime(&my_time),i, input_reg[i], input_reg[i]);
+    }
+
+//    uint8_t* input_coils = obj.ReadInputCoils(0, 2);
+//
+//    for (int i=0; i < 5; i++)
+//    {
+//        printf("%s :input coils[%d]=%d (0x%X)\n",ctime(&my_time),i, input_coils[i], input_coils[i]);
+//    }
+    obj.close();
+    return 0;
 }
+
+
 //connect to mongo db
 
 
@@ -267,3 +371,14 @@ int main ()
 //    {
 //        printf("%s : reg[%d]=%d (0x%X)\n", ctime(&my_time), i, tab_reg[i], tab_reg[i]);
 //    }
+
+//struct structModbusTCP *modbusTCPConfig = (struct structModbusTCP *)malloc(sizeof(struct structModbusTCP));
+//                    vector<string> v{split(TagGroupConfigIterator->ConnectionString, ';')};
+//                    vector<string> v1{split(v[0], ':')};
+//                    vector<string> v2{split(v[1], ':')};
+//
+//                    modbusTCPConfig->ip_address = v1[1].c_str();
+//                    modbusTCPConfig->port = atoi(v2[1].c_str());
+//                    modbusTCPConfig->slaveid = TagGroupConfigIterator->SlaveID;
+//                    std::thread th1(func_dummy, 2);
+//                    th1.join();
