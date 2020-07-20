@@ -19,7 +19,7 @@ class LibModbusClient
          * \param val New value to set
          */
         //void SetCounter(unsigned int val) { m_Counter = val; }
-
+modbus_t* mb; //!< Member variable
 
         LibModbusClient CreateTcpClient(string, int);
 
@@ -35,7 +35,7 @@ class LibModbusClient
     protected:
 
     private:
-        modbus_t* mb; //!< Member variable
+
 };
 
 #endif // LIBMODBUSCLIENT_H

@@ -17,6 +17,7 @@ LibModbusClient::~LibModbusClient()
 LibModbusClient LibModbusClient::CreateTcpClient(string ip_address, int port)
 {
     LibModbusClient object = LibModbusClient();
+
     object.mb = modbus_new_tcp(ip_address.c_str(), port);
     return object;
 }
@@ -24,7 +25,11 @@ LibModbusClient LibModbusClient::CreateTcpClient(string ip_address, int port)
 LibModbusClient LibModbusClient::CreateRtuClient(string port,int baudrate,char parity,int bytesize,int stopbits)
 {
     LibModbusClient object = LibModbusClient();
+
     object.mb = modbus_new_rtu(port.c_str(), baudrate, parity, bytesize, stopbits);
+    if (object.mb == NULL) {
+        fprintf(stderr, "Unable to create the libmodbus context\n");
+    }
     return object;
 }
 
@@ -48,6 +53,7 @@ int LibModbusClient::SetSlaveID(int slaveid)
         modbus_free(mb);
         return -1;
     }
+    return 0;
 }
 
 uint16_t* LibModbusClient::ReadHoldingRegisters(int address, int number)
