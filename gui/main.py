@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
 					application_path = os.path.dirname(sys.executable)
 				elif __file__:
 					application_path = os.path.dirname(__file__)
-				ConfigFileReader.config_file_path = os.path.join(application_path, r"configs\config.cfg")
+				ConfigFileReader.config_file_path = os.path.join(application_path, "configs/config.cfg")
 				ConfigFileReader.application_path = application_path
 				config_file_reader = ConfigFileReader()
 
