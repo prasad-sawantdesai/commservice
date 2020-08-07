@@ -1,11 +1,13 @@
-import sys
-import time
 import logging
 import os
+import sys
+import time
 
-from PySide2 import QtCore, QtGui
-from PySide2.QtGui import QIcon, QPixmap
-from PySide2.QtWidgets import QAction, QApplication, QMainWindow, QSplashScreen
+from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2.QtCore import Signal
+from PySide2.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel, Qt
+from PySide2.QtWidgets import QAction, QApplication, QFrame, QHBoxLayout, QMainWindow, QMenu, QMessageBox, \
+		QSplashScreen, QSplitter, QTreeView, QWidget
 
 from app.presenter.view.frm_add_machine import FrmAddMachine
 from app.presenter.view.frm_add_modbusrtu_connection import FrmAddModbusRtuConnection
@@ -15,19 +17,274 @@ from app.presenter.view.frm_add_tag_groups import FrmTagGroups
 from app.presenter.view.frm_add_tags import FrmAddTags
 from app.presenter.view.frm_addcontroller import FrmAddController
 from app.presenter.view.frm_adddriver import FrmAddDriver
+from app.presenter.view.frm_edit_machine import FrmEditMachine
+from app.presenter.view.frm_edit_modbusrtu_connection import FrmEditModbusRtuConnection
+from app.presenter.view.frm_edit_modbustcp_connection import FrmEditModbusTcpConnection
+from app.presenter.view.frm_edit_settings import FrmEditSettings
+from app.presenter.view.frm_edit_tag_groups import FrmEditTagGroups
+from app.presenter.view.frm_editcontroller import FrmEditController
 from app.presenter.view.frm_tag_mapping import FrmTagMapping
+from frm_tag_viewer import FrmTagViewer
 from app.utilities.configfilereader import ConfigFileReader
 from app.utilities.database_management import DatabaseManagement
 
 logger = logging.getLogger(__name__)
 
+IMAGE_DIRECTORY = os.path.join(os.path.dirname(__file__), "resources")
+
+
 class MainWindow(QMainWindow):
+		signal_view_tags = Signal()
 
 		def __init__(self):
 				super().__init__()
+				self.selected_item_id = None
+				self.selected_plc = None
+				self.selected_connection = None
+				self.selected_group_id = None
 				self.InitConfig()
 				self.set_window_properties()
+
+				self.InitMainWindow()
 				self.initUI()
+
+		def InitMainWindow(self):
+				obj_db_management = DatabaseManagement.get_instance()
+				self.tv_config_explorer = QTreeView()
+				# self.tv_config_explorer.setAlternatingRowColors(True)
+				self.tv_config_explorer.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+				self.tv_config_explorer.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+				self.tv_config_explorer.setHeaderHidden(False)
+
+				self.tv_config_explorer_model = QStandardItemModel()
+				self.tv_config_explorer.setModel(self.tv_config_explorer_model)
+				self.tv_config_explorer.setHeaderHidden(False)
+				self.tv_config_explorer.model().setHorizontalHeaderLabels(['Configuration', ''])
+
+				root_node = self.tv_config_explorer_model.invisibleRootItem()
+
+				for tv_node in ['Controllers', 'Tag Groups']:
+						qsi_tv_node = QStandardItem(tv_node)
+						root_node.appendRow(qsi_tv_node)
+						if tv_node == 'Controllers':
+								qsi_tv_node.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'device_16.png')))
+								self.refresh_controllers(qsi_tv_node)
+
+						if tv_node == 'Tag Groups':
+								self.refresh_taggroups(qsi_tv_node)
+
+				self.tv_config_explorer.setColumnWidth(0, 2000)
+				# self.tv_config_explorer.expandAll()
+				# self.tv_config_explorer.setColumnHidden(1, True)
+
+				self.action_add_new_controller = QAction("Add new Controller ", self, triggered = self.show_frm_add_controller)
+				self.action_add_new_controller.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'plus_16.png')))
+
+				self.action_edit_controller = QAction("Edit Controller ", self, triggered = self.show_frm_edit_controller)
+				self.action_edit_controller.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'edit_16.png')))
+
+				self.action_delete_controller = QAction("Delete Controller ", self, triggered = self.delete_controller)
+				self.action_delete_controller.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'delete_16.png')))
+
+				self.action_add_new_taggroup = QAction("Add new Tag group ", self, triggered = self.show_frm_add_tag_groups)
+				self.action_add_new_taggroup.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'taggroup_16.png')))
+
+				self.action_add_new_machine = QAction("Add new Machine ", self, triggered = self.show_frm_add_machine)
+				self.action_add_new_machine.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'plus_16.png')))
+
+				self.action_add_new_modbus_rtu = QAction("Add new Modbus RTU Connection ", self,
+																								 triggered = self.show_frm_add_modbusrtu_connection)
+				self.action_add_new_modbus_rtu.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'plus_16.png')))
+
+				self.action_add_new_modbus_tcp = QAction("Add new Modbus TCP Connection ", self,
+																								 triggered = self.show_frm_add_modbustcp_connection)
+				self.action_add_new_modbus_tcp.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'plus_16.png')))
+
+				self.action_delete_machine = QAction("Delete Machine ", self, triggered = self.delete_machine)
+				self.action_delete_machine.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'delete_16.png')))
+
+				self.action_delete_connection = QAction("Delete Connection ", self, triggered = self.delete_connection)
+				self.action_delete_connection.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'delete_16.png')))
+
+				self.action_edit_machine = QAction("Edit Machine ", self, triggered = self.show_frm_edit_machine)
+				self.action_edit_machine.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'edit_16.png')))
+
+				self.action_edit_connection = QAction("Edit Connection ", self, triggered = self.show_frm_edit_connection)
+				self.action_edit_connection.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'edit_16.png')))
+
+				self.action_delete_taggroup = QAction("Delete Tag Group ", self, triggered = self.delete_taggroup)
+				self.action_delete_taggroup.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'delete_16.png')))
+
+				self.action_edit_taggroup = QAction("Edit Tag Group ", self, triggered = self.show_frm_edit_taggroup)
+				self.action_edit_taggroup.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'edit_16.png')))
+
+				self.action_view_all_tags = QAction("View All Tags ", self, triggered = self.view_alltags)
+				self.action_view_all_tags.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'viewall_16.png')))
+
+				self.action_view_tags = QAction("View Tags ", self, triggered = self.view_tags)
+				self.action_view_tags.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'view_16.png')))
+
+				self.action_add_tag = QAction("View Tags ", self, triggered = self.show_frm_add_tags)
+				self.action_add_tag.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'view_16.png')))
+
+				centralWidget = QWidget()
+				self.setCentralWidget(centralWidget)
+				layout = QHBoxLayout(centralWidget)
+
+				# Initialize tab screen
+				self.frame_right = FrmTagViewer()
+				self.signal_view_tags.connect(self.frame_right.load_tags)
+				self.frame_right.setFrameShape(QFrame.StyledPanel)
+
+				widget_splitter = QSplitter(Qt.Horizontal)
+				widget_splitter.addWidget(self.tv_config_explorer)
+				widget_splitter.addWidget(self.frame_right)
+
+				widget_splitter.setSizes([50, 300])
+
+				layout.addWidget(widget_splitter)
+
+		def refresh_controllers(self, qsi_tv_node):
+				obj_db_management = DatabaseManagement.get_instance()
+				controllers = obj_db_management.select_all_controllers()
+				for controller in controllers:
+						qsi_tv_controller = QStandardItem(controller[1])
+						qsi_tv_controller.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'plc_16.png')))
+						qsi_tv_controller.setEditable(False)
+						qsi_tv_controller_id = QStandardItem(str(controller[0]))
+						qsi_tv_node.appendRow([qsi_tv_controller, qsi_tv_controller_id])
+
+						qsi_tv_machines = QStandardItem("Machines")
+						qsi_tv_machines.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'slaves_16.png')))
+						qsi_tv_controller.appendRow(qsi_tv_machines)
+						machines = obj_db_management.select_all_machines(controller[0])
+						for machine in machines:
+								qsi_tv_machine = QStandardItem(machine[1])
+								qsi_tv_machine.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'slave_16.png')))
+								qsi_tv_machine.setEditable(False)
+								qsi_tv_machine_id = QStandardItem(str(machine[0]))
+								qsi_tv_machines.appendRow([qsi_tv_machine, qsi_tv_machine_id])
+
+						qsi_tv_connections = QStandardItem("Connections")
+						qsi_tv_connections.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'connections_16.png')))
+						qsi_tv_controller.appendRow(qsi_tv_connections)
+						connections = obj_db_management.select_all_connections(controller[0])
+						for connection in connections:
+								qsi_tv_connection = QStandardItem(connection[1])
+								qsi_tv_connection.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'connection_16.png')))
+								qsi_tv_connection.setEditable(False)
+								qsi_tv_connection_id = QStandardItem(str(connection[0]))
+								qsi_tv_connections.appendRow([qsi_tv_connection, qsi_tv_connection_id])
+
+		def refresh_taggroups(self, qsi_tv_node):
+				obj_db_management = DatabaseManagement.get_instance()
+				qsi_tv_node.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'tags_16.png')))
+				tag_groups = obj_db_management.select_all_tag_groups()
+				for tag_group in tag_groups:
+						qsi_tv_tag_group = QStandardItem(tag_group[1])
+						qsi_tv_tag_group.setData(tag_group, Qt.UserRole)
+						qsi_tv_tag_group.setIcon(QIcon(os.path.join(IMAGE_DIRECTORY, 'taggroup_16.png')))
+						qsi_tv_tag_group.setEditable(False)
+						qsi_tv_tag_group_id = QStandardItem(str(tag_group[0]))
+						qsi_tv_node.appendRow([qsi_tv_tag_group, qsi_tv_tag_group_id])
+
+		def contextMenuEvent(self, event):
+				# Fetch item for the index fetched from the selection
+				index_component_name = self.tv_config_explorer.selectedIndexes()[0]
+				index_component_id = None
+				if len(self.tv_config_explorer.selectedIndexes()) == 2:
+						self.selected_item_id = self.tv_config_explorer.selectedIndexes()[1].data()
+
+				# Get information from base model instead
+				if index_component_name.data() == "Controllers":
+						ctx_menu = QMenu()
+						ctx_menu.addAction(self.action_add_new_controller)
+						ctx_menu.exec_(event.globalPos())
+						controllers_node = self.tv_config_explorer_model.itemFromIndex(index_component_name)
+						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(index_component_name),
+																										 index_component_name)
+						self.refresh_controllers(controllers_node)
+
+				elif index_component_name.parent().data() == "Controllers":
+						ctx_menu = QMenu()
+						ctx_menu.addAction(self.action_edit_controller)
+						ctx_menu.addAction(self.action_delete_controller)
+
+						ctx_menu.exec_(event.globalPos())
+						controllers_node = self.tv_config_explorer_model.itemFromIndex(index_component_name.parent())
+						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(
+								index_component_name.parent()),
+																										 index_component_name.parent())
+						self.refresh_controllers(controllers_node)
+				elif index_component_name.parent().parent().data() == "Controllers":
+						ctx_menu = QMenu()
+						self.selected_plc = index_component_name.parent().data()
+						if index_component_name.data() == "Machines":
+								ctx_menu.addAction(self.action_add_new_machine)
+
+						if index_component_name.data() == "Connections":
+								self.selected_plc = index_component_name.parent().data()
+								ctx_menu.addAction(self.action_add_new_modbus_rtu)
+								ctx_menu.addAction(self.action_add_new_modbus_tcp)
+
+						ctx_menu.exec_(event.globalPos())
+						controllers_node = self.tv_config_explorer_model.itemFromIndex(index_component_name.parent().parent())
+						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(
+								index_component_name.parent().parent()),
+																										 index_component_name.parent().parent())
+						self.refresh_controllers(controllers_node)
+				elif index_component_name.parent().data() == "Machines":
+						self.selected_plc = index_component_name.parent().parent().data()
+						ctx_menu = QMenu()
+						ctx_menu.addAction(self.action_edit_machine)
+						ctx_menu.addAction(self.action_delete_machine)
+
+						ctx_menu.exec_(event.globalPos())
+						controllers_node = self.tv_config_explorer_model.itemFromIndex(
+								index_component_name.parent().parent().parent())
+						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(
+								index_component_name.parent().parent().parent()),
+																										 index_component_name.parent().parent().parent())
+						self.refresh_controllers(controllers_node)
+				elif index_component_name.parent().data() == "Connections":
+						self.selected_plc = index_component_name.parent().parent().data()
+						self.selected_connection = index_component_name.data()
+						ctx_menu = QMenu()
+						ctx_menu.addAction(self.action_edit_connection)
+						ctx_menu.addAction(self.action_delete_connection)
+
+						ctx_menu.exec_(event.globalPos())
+						controllers_node = self.tv_config_explorer_model.itemFromIndex(
+										index_component_name.parent().parent().parent())
+						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(
+										index_component_name.parent().parent().parent()),
+																										 index_component_name.parent().parent().parent())
+						self.refresh_controllers(controllers_node)
+				elif index_component_name.data() == "Tag Groups":
+						self.frame_right.selected_taggroup_id = '*'
+						ctx_menu = QMenu()
+						ctx_menu.addAction(self.action_view_all_tags)
+						ctx_menu.addAction(self.action_add_new_taggroup)
+						ctx_menu.addAction(self.action_add_tag)
+						ctx_menu.exec_(event.globalPos())
+
+						taggroups_node = self.tv_config_explorer_model.itemFromIndex(index_component_name)
+						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(
+										index_component_name), index_component_name)
+						self.refresh_taggroups(taggroups_node)
+				elif index_component_name.parent().data() == "Tag Groups":
+						self.frame_right.selected_taggroup_id = self.selected_item_id
+						ctx_menu = QMenu()
+						ctx_menu.addAction(self.action_view_tags)
+						ctx_menu.addAction(self.action_edit_taggroup)
+						ctx_menu.addAction(self.action_delete_taggroup)
+						ctx_menu.exec_(event.globalPos())
+
+						taggroups_node = self.tv_config_explorer_model.itemFromIndex(index_component_name.parent())
+						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(
+										index_component_name.parent()), index_component_name.parent())
+						self.refresh_taggroups(taggroups_node)
+				return
 
 		def InitConfig(self):
 
@@ -35,16 +292,15 @@ class MainWindow(QMainWindow):
 				application_path = ""
 				# Get application executable path
 				if getattr(sys, 'frozen', False):
-					application_path = os.path.dirname(sys.executable)
+						application_path = os.path.dirname(sys.executable)
 				elif __file__:
-					application_path = os.path.dirname(__file__)
+						application_path = os.path.dirname(__file__)
 				ConfigFileReader.config_file_path = os.path.join(application_path, "configs/config.cfg")
 				ConfigFileReader.application_path = application_path
 				config_file_reader = ConfigFileReader()
 
 				DatabaseManagement.db_file_path = config_file_reader.database_path
 				database_management = DatabaseManagement()
-
 
 		def initUI(self):
 				exitAct = QAction(QIcon('exit.png'), '&Exit', self)
@@ -102,6 +358,10 @@ class MainWindow(QMainWindow):
 				addTagMappingAct.setStatusTip('Add tag groups')
 				addTagMappingAct.triggered.connect(self.show_frm_add_tag_mapping)
 
+				settingsAct = QAction(QIcon('add.png'), '&Settings', self)
+				# addModbusTcpAct.setShortcut('Ctrl+M')
+				settingsAct.setStatusTip('Update settings')
+				settingsAct.triggered.connect(self.show_frm_settings)
 
 				self.statusBar().showMessage('Ready')
 
@@ -125,6 +385,7 @@ class MainWindow(QMainWindow):
 
 				configMenu.addAction(addDriverAct)
 				configMenu.addAction(addTagMappingAct)
+				configMenu.addAction(settingsAct)
 
 				windowMenu = menubar.addMenu('&Window')
 
@@ -151,20 +412,86 @@ class MainWindow(QMainWindow):
 				dialog.show()
 				dialog.exec_()
 
+		def show_frm_edit_controller(self):
+				dialog = FrmEditController(self.selected_item_id)
+				dialog.setModal(True)
+				dialog.show()
+				dialog.exec_()
+
+		def delete_controller(self):
+				obj_db_management = DatabaseManagement.get_instance()
+				obj_db_management.delete_controller_by_id(self.selected_item_id)
+				QMessageBox.information(self, 'Controller', "Controller deleted successfully",
+																QMessageBox.Ok)
+
 		def show_frm_add_machine(self):
-				dialog = FrmAddMachine()
+				dialog = FrmAddMachine(self.selected_plc)
 				dialog.setModal(True)
 				dialog.show()
 				dialog.exec_()
 
 		def show_frm_add_modbusrtu_connection(self):
-				dialog = FrmAddModbusRtuConnection()
+				dialog = FrmAddModbusRtuConnection(self.selected_plc)
 				dialog.setModal(True)
 				dialog.show()
 				dialog.exec_()
 
 		def show_frm_add_modbustcp_connection(self):
-				dialog = FrmAddModbusTcpConnection()
+				dialog = FrmAddModbusTcpConnection(self.selected_plc)
+				dialog.setModal(True)
+				dialog.show()
+				dialog.exec_()
+
+		def delete_machine(self):
+				obj_db_management = DatabaseManagement.get_instance()
+				obj_db_management.delete_machine_by_id(self.selected_item_id)
+				QMessageBox.information(self, 'Machine', "Machine deleted successfully",
+																QMessageBox.Ok)
+
+		def view_alltags(self):
+				self.signal_view_tags.emit()
+
+		def view_tags(self):
+				self.signal_view_tags.emit()
+
+		def delete_connection(self):
+				obj_db_management = DatabaseManagement.get_instance()
+				obj_db_management.delete_connection_by_id(self.selected_item_id)
+				QMessageBox.information(self, 'Connection', "Connection deleted successfully",
+																QMessageBox.Ok)
+
+		def delete_taggroup(self):
+				obj_db_management = DatabaseManagement.get_instance()
+				obj_db_management.delete_taggroup_by_id(self.selected_item_id)
+				QMessageBox.information(self, 'Tag Group', "Tag Group deleted successfully",
+																QMessageBox.Ok)
+
+		def show_frm_edit_machine(self):
+				dialog = FrmEditMachine(self.selected_item_id, self.selected_plc)
+				dialog.setModal(True)
+				dialog.show()
+				dialog.exec_()
+
+		def show_frm_edit_taggroup(self):
+				dialog = FrmEditTagGroups(self.selected_item_id)
+				dialog.setModal(True)
+				dialog.show()
+				dialog.exec_()
+
+		def show_frm_edit_connection(self):
+				if "COMPORT" in self.selected_connection:
+						self.show_frm_edit_modbusrtu_connection()
+				elif "IPADDRESS" in self.selected_connection:
+						self.show_frm_edit_modbustcp_connection()
+
+		def show_frm_edit_modbusrtu_connection(self):
+				dialog = FrmEditModbusRtuConnection(self.selected_item_id, self.selected_plc)
+				dialog.setModal(True)
+				dialog.show()
+				dialog.exec_()
+
+		def show_frm_edit_modbustcp_connection(self):
+				dialog = FrmEditModbusTcpConnection(self.selected_item_id, self.selected_plc)
 				dialog.setModal(True)
 				dialog.show()
 				dialog.exec_()
@@ -187,7 +514,6 @@ class MainWindow(QMainWindow):
 				dialog.show()
 				dialog.exec_()
 
-
 		def show_frm_add_driver(self):
 				dialog = FrmAddDriver()
 				dialog.setModal(True)
@@ -199,6 +525,14 @@ class MainWindow(QMainWindow):
 				dialog.setModal(True)
 				dialog.show()
 				dialog.exec_()
+
+		def show_frm_settings(self):
+				dialog = FrmEditSettings()
+				dialog.setModal(True)
+				dialog.show()
+				dialog.exec_()
+
+
 def main():
 		app = QApplication(sys.argv)
 		# for the splash screen

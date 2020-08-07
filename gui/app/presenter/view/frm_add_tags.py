@@ -12,7 +12,6 @@ class FrmAddTags(QDialog):
 
 		def __init__(self):
 				super(FrmAddTags, self).__init__()
-
 				self.setWindowTitle("Add Tag")
 
 				self.group_box_tag_info = QGroupBox("Tag Information")

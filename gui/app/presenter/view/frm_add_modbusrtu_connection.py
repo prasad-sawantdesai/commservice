@@ -10,7 +10,7 @@ PROTOCOL_NAME = "Modbus RTU"
 
 class FrmAddModbusRtuConnection(QDialog):
 
-		def __init__(self):
+		def __init__(self, plc_name=None):
 				super(FrmAddModbusRtuConnection, self).__init__()
 
 				self.setWindowTitle("Add Modbus RTU Connection")
@@ -26,6 +26,10 @@ class FrmAddModbusRtuConnection(QDialog):
 						self.controller_collection.addItem(controller[1])
 
 				self.form_layout_plc_selection.addRow(QLabel("Select PLC:"), self.controller_collection)
+				if plc_name is not None:
+						self.controller_collection.setCurrentText(plc_name)
+						self.controller_collection.setEnabled(False)
+
 				self.group_box_plc_selection.setLayout(self.form_layout_plc_selection)
 
 				# "/dev/ttyUSB0", 115200, 'N', 8, 1
@@ -65,7 +69,7 @@ class FrmAddModbusRtuConnection(QDialog):
 																"BAUDRATE:" + self.controller_baudrate.currentText() + ";" + \
 																"PARITY:" + self.controller_parity.currentText() + ";" + \
 																"DATABITS:" + self.controller_data_bits.currentText() + ";" + \
-																"STOPBITS:" + self.controller_stop_bits.currentText() + ";"
+																"STOPBITS:" + self.controller_stop_bits.currentText()
 
 						driver_index = obj_db_management.get_driver_index("Modbus RTU")
 						plc_index = obj_db_management.get_plc_index(self.controller_collection.currentText())

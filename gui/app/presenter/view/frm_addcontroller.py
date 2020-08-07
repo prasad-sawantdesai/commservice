@@ -34,12 +34,16 @@ class FrmAddController(QDialog):
 
 		def store(self):
 				try:
-						obj_db_management = DatabaseManagement.get_instance()
-						controller = (self.controller_name.text(), self.controller_description.text())
-						obj_db_management.create_controller(controller)
-						QMessageBox.information(self, 'Controller', "New controller added successfully",
-																 QMessageBox.Ok)
-						self.close()
+						if self.controller_name.text() == "":
+								QMessageBox.information(self, 'Controller', "Please provide controller name",
+																		QMessageBox.Ok)
+						else:
+								obj_db_management = DatabaseManagement.get_instance()
+								controller = (self.controller_name.text(), self.controller_description.text())
+								obj_db_management.create_controller(controller)
+								QMessageBox.information(self, 'Controller', "New controller added successfully",
+																		 QMessageBox.Ok)
+								self.close()
 				except Exception  as err:
 						mb = QMessageBox()
 						mb.setIcon(mb.Icon.Warning)

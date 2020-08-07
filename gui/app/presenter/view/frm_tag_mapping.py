@@ -16,7 +16,8 @@ class FrmTagMapping(QDialog):
 
 				self.setWindowTitle("Tag groups mapping")
 				self.setGeometry(100, 100, 600, 400)
-
+				self.mInput = QtWidgets.QListWidget()
+				self.mOuput = QtWidgets.QListWidget()
 				# Tag group Selection
 				self.group_box_tag_group_selection = QGroupBox("Tag group Selection")
 				self.form_layout_tag_group_selection = QFormLayout()
@@ -25,13 +26,15 @@ class FrmTagMapping(QDialog):
 				tag_groups = obj_db_management.select_all_tag_groups()
 				for tag_group in tag_groups:
 						self.tag_group_collection.addItem(str(tag_group[1]))
+				self.tag_group_collection.currentTextChanged.connect(self.on_tag_group_changed)
+				if self.tag_group_collection.count()>0:
+						self.on_tag_group_changed()
 				self.form_layout_tag_group_selection.addRow(QLabel("Select Tag group to update:"), self.tag_group_collection)
 				self.group_box_tag_group_selection.setLayout(self.form_layout_tag_group_selection)
 
 				self.group_box_tag_definition = QGroupBox("Define Tags here")
 				lay = QtWidgets.QHBoxLayout(self)
-				self.mInput = QtWidgets.QListWidget()
-				self.mOuput = QtWidgets.QListWidget()
+
 
 				self.mButtonToSelected = QtWidgets.QPushButton(">>")
 				self.mBtnMoveToAvailable = QtWidgets.QPushButton(">")
@@ -62,13 +65,7 @@ class FrmTagMapping(QDialog):
 
 				self.update_buttons_status()
 				self.connections()
-				tags = []
-				obj_db_management = DatabaseManagement.get_instance()
-				received_tags = obj_db_management.select_all_tags()
-				for tag in received_tags:
-						tags.append(tag[1])
 
-				self.addAvailableItems(tags)
 				self.group_box_tag_definition.setLayout(lay)
 
 				button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -85,10 +82,13 @@ class FrmTagMapping(QDialog):
 		def store(self):
 				try:
 						obj_db_management = DatabaseManagement.get_instance()
+
 						tag_group_index = obj_db_management.get_tag_group_index(self.tag_group_collection.currentText())
+						obj_db_management.delete_tagmapping_by_taggroupid(int(tag_group_index[0][0]))
 						for selectedItem in self.get_right_elements():
 								tag_index = obj_db_management.get_tag_index(selectedItem)
 								mapping = (int(tag_group_index[0][0]), tag_index[0][0])
+
 								obj_db_management.create_tag_mapping(mapping)
 
 						QMessageBox.information(self, 'Tag Mapping', "Tag mapping done successfully",
@@ -101,6 +101,22 @@ class FrmTagMapping(QDialog):
 						mb.exec_()
 				self.close()
 
+		def on_tag_group_changed(self, value=None):
+				obj_db_management = DatabaseManagement()
+				self.mInput.clear()
+				alltags = []
+				received_tags = obj_db_management.select_all_tags()
+				for tag in received_tags:
+						alltags.append(tag[1])
+
+				tag_group_index = obj_db_management.get_tag_group_index(self.tag_group_collection.currentText())
+				tags = obj_db_management.select_all_tags_for_display(tag_group_index[0][0])
+				self.mOuput.clear()
+				for tag in tags:
+						self.mOuput.addItem(tag[1])
+						if tag[1] in alltags:
+								alltags.remove(tag[1])
+				self.addAvailableItems(alltags)
 		def cancel(self):
 				self.close()
 

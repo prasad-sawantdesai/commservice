@@ -8,12 +8,12 @@ from app.utilities.database_management import DatabaseManagement
 
 class FrmAddMachine(QDialog):
 
-		def __init__(self):
+		def __init__(self, plc_name=None):
 				super(FrmAddMachine, self).__init__()
 
 				self.setWindowTitle("Add Machine")
-
 				# PLC Selection
+
 				self.group_box_plc_selection = QGroupBox("PLC Selection")
 				self.form_layout_plc_selection = QFormLayout()
 				self.controller_collection = QComboBox()
@@ -24,6 +24,9 @@ class FrmAddMachine(QDialog):
 						self.controller_collection.addItem(controller[1])
 
 				self.form_layout_plc_selection.addRow(QLabel("Select PLC:"), self.controller_collection)
+				if plc_name is not None:
+						self.controller_collection.setCurrentText(plc_name)
+						self.controller_collection.setEnabled(False)
 				self.group_box_plc_selection.setLayout(self.form_layout_plc_selection)
 
 				# "/dev/ttyUSB0", 115200, 'N', 8, 1
