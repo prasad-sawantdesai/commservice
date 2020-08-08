@@ -1,7 +1,5 @@
 Prerequisite
-1. Install pipdeptree using pip install pipdeptree
-
-To generate dependency file
-1. pipdeptree -fl > requirements.txt
-2. In virtual environment, pip install -r requirements.txt
+1. Install Python version 3.7.5
+2. pip install -r requirements.txt
+3. Run python main.py
 

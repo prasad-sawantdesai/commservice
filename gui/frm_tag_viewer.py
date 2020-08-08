@@ -220,7 +220,7 @@ class FrmTagViewer(QFrame):
 										sub_item4.setEditable(False)
 										sub_item5.setEditable(False)
 										sub_item6.setEditable(False)
-										sub_item6.setTextAlignment(Qt.AlignRight)
+										sub_item1.setTextAlignment(Qt.AlignRight)
 										item.appendRow([ sub_item2, sub_item3,sub_item4,sub_item5,sub_item6, sub_item1])
 				else:
 						taggroup_name = obj_db_management.get_tag_group_name(self.selected_taggroup_id)[0][0]
@@ -244,7 +244,7 @@ class FrmTagViewer(QFrame):
 								sub_item4.setEditable(False)
 								sub_item5.setEditable(False)
 								sub_item6.setEditable(False)
-								sub_item6.setTextAlignment(Qt.AlignRight)
+								sub_item1.setTextAlignment(Qt.AlignRight)
 								item.appendRow([ sub_item2, sub_item3, sub_item4, sub_item5, sub_item6, sub_item1])
 
 				self.expand_treeview_items()

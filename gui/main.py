@@ -2,12 +2,13 @@ import logging
 import os
 import sys
 import time
+from configparser import ConfigParser
 
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Signal
 from PySide2.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel, Qt
 from PySide2.QtWidgets import QAction, QApplication, QFrame, QHBoxLayout, QMainWindow, QMenu, QMessageBox, \
-		QSplashScreen, QSplitter, QTreeView, QWidget
+		QSplashScreen, QSplitter, QTreeView, QWidget, QFileDialog
 
 from app.presenter.view.frm_add_machine import FrmAddMachine
 from app.presenter.view.frm_add_modbusrtu_connection import FrmAddModbusRtuConnection
@@ -49,11 +50,39 @@ class MainWindow(QMainWindow):
 				self.selected_plc = None
 				self.selected_connection = None
 				self.selected_group_id = None
+
+		def start(self):
 				self.InitConfig()
 				self.set_window_properties()
 
 				self.InitMainWindow()
 				self.initUI()
+
+		def InitConfig(self):
+				# Read Configuration file
+
+				ConfigFileReader.config_file_path = os.path.join(application_path, r"configs/config.cfg")
+				if not os.path.exists(ConfigFileReader.config_file_path):
+						QMessageBox.warning(self, 'Config file error', "Configuration file not found.. Couldn't proceed..",
+																QMessageBox.Ok)
+						sys.exit(-1)
+				ConfigFileReader.application_path = application_path
+				config_file_reader = ConfigFileReader()
+
+				DatabaseManagement.db_file_path = config_file_reader.database_path
+				if not os.path.exists(config_file_reader.database_path):
+						QMessageBox.warning(self, 'Database file error', "Database file not found.. Select database in next window",
+																QMessageBox.Ok)
+						database_filepath = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\', "Database files (*.db )")
+						config_object = ConfigParser()
+						config_object["database"] = {
+								"path"   : database_filepath[0],
+						}
+						config_file_reader.database_path = database_filepath[0]
+						DatabaseManagement.db_file_path = config_file_reader.database_path
+						with open(ConfigFileReader.config_file_path, 'w') as conf:
+								config_object.write(conf)
+				database_management = DatabaseManagement()
 
 		def InitMainWindow(self):
 				obj_db_management = DatabaseManagement.get_instance()
@@ -293,21 +322,7 @@ class MainWindow(QMainWindow):
 						self.refresh_taggroups(taggroups_node)
 				return
 
-		def InitConfig(self):
 
-				# Read Configuration file
-				application_path = ""
-				# Get application executable path
-				if getattr(sys, 'frozen', False):
-						application_path = os.path.dirname(sys.executable)
-				elif __file__:
-						application_path = os.path.dirname(__file__)
-				ConfigFileReader.config_file_path = os.path.join(application_path, r"configs/config.cfg")
-				ConfigFileReader.application_path = application_path
-				config_file_reader = ConfigFileReader()
-
-				DatabaseManagement.db_file_path = config_file_reader.database_path
-				database_management = DatabaseManagement()
 
 		def initUI(self):
 				exitAct = QAction(QIcon('exit.png'), '&Exit', self)
@@ -543,6 +558,8 @@ class MainWindow(QMainWindow):
 def main():
 		app = QApplication(sys.argv)
 		# for the splash screen
+		config_file_path = os.path.join(application_path, r"configs/config.cfg")
+
 		QIcon()
 		splash_pix = QPixmap(os.path.join(IMAGE_DIRECTORY, 'splash_screen.png'))
 		# Creates the splash screen
@@ -556,6 +573,8 @@ def main():
 		ex = MainWindow()
 		# closes the splash screen
 		splash.finish(ex)
+		ex.start()
+
 		sys.exit(app.exec_())
 
 
