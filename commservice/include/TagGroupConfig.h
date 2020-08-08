@@ -3,6 +3,7 @@
 #include <vector>
 #include "TagConfig.h"
 #include <string>
+#include "LibModbusClient.h"
 using namespace std;
 
 class TagGroupConfig
@@ -23,6 +24,8 @@ class TagGroupConfig
         string DriverFormat;
 
         vector<TagConfig> TagConfigCollection;
+        LibModbusClient objLibModbusClient;
+        int ConnectionStatus;
     protected:
 
     private:

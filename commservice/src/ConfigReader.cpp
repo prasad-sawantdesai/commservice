@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include "TagGroupConfig.h"
+#include "SystemSettings.h"
 using namespace std;
 ConfigReader::ConfigReader()
 {
@@ -32,11 +33,6 @@ vector<TagGroupConfig> ConfigReader::ReadConfiguration(string database_path)
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
         return TagGroupConfigCollection;
     }
-    else
-    {
-        fprintf(stderr, "Opened database successfully\n");
-    }
-
     string sqlTagGroupConfig = "SELECT taggroups.id AS 'TagGroupID', taggroups.name AS 'TagGroupName', taggroups.collection_method AS 'CollectionMethod',taggroups.collection_type AS 'CollectionType', \
                 controller.name AS 'PLCName',controller.description AS 'PLCDescription', machine.manualid AS 'SlaveID', connection.connection_string AS 'ConnectionString', \
                 driver.name AS 'DriverName', driver.format AS 'DriverFormat'\
@@ -70,6 +66,7 @@ vector<TagGroupConfig> ConfigReader::ReadConfiguration(string database_path)
         objTagGroupConfig->ConnectionString = std::string(reinterpret_cast<const char*>(sqlite3_column_text(RESTagGroup,7)));
         objTagGroupConfig->DriverName = std::string(reinterpret_cast<const char*>(sqlite3_column_text(RESTagGroup,8)));
         objTagGroupConfig->DriverFormat = std::string(reinterpret_cast<const char*>(sqlite3_column_text(RESTagGroup,9)));
+        objTagGroupConfig->ConnectionStatus = -1;
 
 
         string sqlTagConfig = "SELECT tags.id AS 'TagID', tags.name AS 'TagName',register_types.ragister_type AS 'TagRegisterType',\
@@ -103,10 +100,51 @@ register_types.range_upper AS 'RangeUpper',register_types.range_lower AS 'RangeL
         TagGroupConfigCollection.push_back(*objTagGroupConfig);
     }
 
+
+
     sqlite3_finalize(RESTagGroup);
     sqlite3_close(db);
 
     return TagGroupConfigCollection;
 }
 
+SystemSettings ConfigReader::ReadSystemSettings(string database_path)
+{
+    SystemSettings objSystemSettings;
+    sqlite3 *db;
+    sqlite3_stmt * RESSystemSettings;
+
+    int rc;
+
+    rc = sqlite3_open(database_path.c_str(), &db);
+    if( rc )
+    {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        return objSystemSettings;
+    }
+
+    string sqlSystemSettings = "SELECT * FROM SystemSettings";
+
+    rc = sqlite3_prepare_v2(db,sqlSystemSettings.c_str(), -1, &RESSystemSettings,0);
+
+    if( rc != SQLITE_OK)
+    {
+        printf("\nFailed to get data: %s",sqlite3_errmsg(db));
+        sqlite3_close(db);
+
+        return objSystemSettings;
+    }
+
+    while (sqlite3_step(RESSystemSettings) != SQLITE_DONE)
+    {
+        objSystemSettings= SystemSettings();
+        objSystemSettings.MongoDBServerAddress = std::string(reinterpret_cast<const char*>(sqlite3_column_text(RESSystemSettings,0)));
+
+    }
+
+    sqlite3_finalize(RESSystemSettings);
+    sqlite3_close(db);
+
+    return objSystemSettings;
+}
 

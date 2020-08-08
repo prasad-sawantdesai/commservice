@@ -19,6 +19,10 @@ LibModbusClient LibModbusClient::CreateTcpClient(string ip_address, int port)
     LibModbusClient object = LibModbusClient();
 
     object.mb = modbus_new_tcp(ip_address.c_str(), port);
+    if (object.mb == NULL)
+    {
+        fprintf(stderr, "Unable to create the libmodbus context\n");
+    }
     return object;
 }
 
@@ -27,7 +31,16 @@ LibModbusClient LibModbusClient::CreateRtuClient(string port,int baudrate,char p
     LibModbusClient object = LibModbusClient();
 
     object.mb = modbus_new_rtu(port.c_str(), baudrate, parity, bytesize, stopbits);
-    if (object.mb == NULL) {
+    uint32_t old_response_to_sec;
+    uint32_t old_response_to_usec;
+
+    /* Save original timeout */
+    modbus_get_response_timeout(object.mb, &old_response_to_sec, &old_response_to_usec);
+
+    /* Define a new timeout of 200ms */
+    modbus_set_response_timeout(object.mb, 0, 200000);
+    if (object.mb == NULL)
+    {
         fprintf(stderr, "Unable to create the libmodbus context\n");
     }
     return object;
@@ -40,8 +53,9 @@ int LibModbusClient::connect()
     {
         fprintf(stderr, "Connection failed: %s\n", modbus_strerror(errno));
         modbus_free(mb);
+        return -1;
     }
-    return ret;
+    return 0;
 }
 int LibModbusClient::SetSlaveID(int slaveid)
 {
@@ -97,7 +111,7 @@ uint16_t* LibModbusClient::ReadInputRegisters(int address, int number)
     return tab_reg;
 }
 
-uint8_t* LibModbusClient::ReadInputCoils(int address, int number)
+uint8_t* LibModbusClient::ReadOutputCoils(int address, int number)
 {
     /** Read input coils
     parameters:
@@ -109,6 +123,26 @@ uint8_t* LibModbusClient::ReadInputCoils(int address, int number)
     uint8_t* tab_reg =  new uint8_t[number];
 
     int rc = modbus_read_bits(mb, address, number, tab_reg);
+    if (rc == -1)
+    {
+        fprintf(stderr, "%s\n", modbus_strerror(errno));
+        return NULL;
+    }
+    return tab_reg;
+}
+
+uint8_t* LibModbusClient::ReadDiscreteInputs(int address, int number)
+{
+    /** Read input coils
+    parameters:
+    address : address of variable
+    number : number of values
+
+    * \return array of values
+    */
+    uint8_t* tab_reg =  new uint8_t[number];
+
+    int rc = modbus_read_input_bits(mb, address, number, tab_reg);
     if (rc == -1)
     {
         fprintf(stderr, "%s\n", modbus_strerror(errno));

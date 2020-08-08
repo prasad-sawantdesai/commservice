@@ -42,7 +42,7 @@
 1593202914 /home/pi/futuremaker/application/commservice/commservice/commservice/include/ConfigReader.h
 	<string>
 
-1595012648 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/ConfigReader.cpp
+1595777205 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/ConfigReader.cpp
 	"ConfigReader.h"
 	<stdio.h>
 	<sqlite3.h>
@@ -51,17 +51,19 @@
 	<vector>
 	<iostream>
 	"TagGroupConfig.h"
+	"SystemSettings.h"
 
-1594985673 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/ConfigReader.h
+1595776659 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/ConfigReader.h
 	"TagGroupConfig.h"
+	"SystemSettings.h"
 	<string>
 
-1595100962 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/LibModbusClient.cpp
+1595946911 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/LibModbusClient.cpp
 	"LibModbusClient.h"
 	<string>
 	<iostream>
 
-1595101022 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/LibModbusClient.h
+1595613439 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/LibModbusClient.h
 	<string>
 	"modbus.h"
 
@@ -82,20 +84,20 @@
 1575875089 /usr/include/modbus/modbus-rtu.h
 	"modbus.h"
 
-1595267258 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/main.cpp
+1595953243 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/main.cpp
 	<iostream>
 	<cstdlib>
 	<pthread.h>
 	<time.h>
 	<cstdlib>
+	<vector>
+	<string>
+	<thread>
+	<unistd.h>
 	"ConfigReader.h"
 	"DatabaseWriter.h"
 	"TagGroupConfig.h"
 	"LibModbusClient.h"
-	<vector>
-	<string>
-	<unistd.h>
-	<thread>
 
 1595018207 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/DatabaseWriter.cpp
 	"DatabaseWriter.h"
@@ -629,14 +631,21 @@
 1594393423 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/TagGroupConfig.cpp
 	"TagGroupConfig.h"
 
-1594988759 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagGroupConfig.h
+1595697801 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagGroupConfig.h
 	<vector>
 	"TagConfig.h"
 	<string>
+	"LibModbusClient.h"
 
 1594654877 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/TagConfig.cpp
 	"TagConfig.h"
 
 1594989207 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/TagConfig.h
+	<string>
+
+1595775888 source:/home/ujjaini/prasad/commservice/git_repo/commservice/commservice/src/SystemSettings.cpp
+	"SystemSettings.h"
+
+1595776553 /home/ujjaini/prasad/commservice/git_repo/commservice/commservice/include/SystemSettings.h
 	<string>
 
