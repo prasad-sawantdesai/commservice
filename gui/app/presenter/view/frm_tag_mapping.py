@@ -8,14 +8,11 @@ from app.utilities.database_management import DatabaseManagement
 
 
 class FrmTagMapping(QDialog):
-		NumGridRows = 3
-		NumButtons = 4
 
 		def __init__(self):
 				super(FrmTagMapping, self).__init__()
 
 				self.setWindowTitle("Tag groups mapping")
-				self.setGeometry(100, 100, 600, 400)
 				self.mInput = QtWidgets.QListWidget()
 				self.mOuput = QtWidgets.QListWidget()
 				# Tag group Selection
