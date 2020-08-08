@@ -30,7 +30,14 @@ from app.utilities.database_management import DatabaseManagement
 
 logger = logging.getLogger(__name__)
 
-IMAGE_DIRECTORY = os.path.join(os.path.dirname(__file__), "resources")
+# Get application executable path
+application_path=""
+if getattr(sys, 'frozen', False):
+		application_path = os.path.dirname(sys.executable)
+elif __file__:
+		application_path = os.path.dirname(__file__)
+
+IMAGE_DIRECTORY = os.path.join(application_path, "resources")
 
 
 class MainWindow(QMainWindow):
@@ -295,7 +302,7 @@ class MainWindow(QMainWindow):
 						application_path = os.path.dirname(sys.executable)
 				elif __file__:
 						application_path = os.path.dirname(__file__)
-				ConfigFileReader.config_file_path = os.path.join(application_path, "configs/config.cfg")
+				ConfigFileReader.config_file_path = os.path.join(application_path, r"configs/config.cfg")
 				ConfigFileReader.application_path = application_path
 				config_file_reader = ConfigFileReader()
 
@@ -536,7 +543,8 @@ class MainWindow(QMainWindow):
 def main():
 		app = QApplication(sys.argv)
 		# for the splash screen
-		splash_pix = QtGui.QPixmap("resources\\splash_screen.png")
+		QIcon()
+		splash_pix = QPixmap(os.path.join(IMAGE_DIRECTORY, 'splash_screen.png'))
 		# Creates the splash screen
 		splash = QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
 		splash.setMask(splash_pix.mask())

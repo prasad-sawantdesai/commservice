@@ -1,4 +1,5 @@
 import os
+import sys
 from PySide2 import QtCore, QtGui
 from PySide2.QtCore import QSortFilterProxyModel
 
@@ -11,8 +12,13 @@ from app.presenter.view.frm_edit_tags import FrmEditTags
 from app.presenter.view.frm_tag_mapping import FrmTagMapping
 from app.utilities.database_management import DatabaseManagement
 
+application_path=""
+if getattr(sys, 'frozen', False):
+		application_path = os.path.dirname(sys.executable)
+elif __file__:
+		application_path = os.path.dirname(__file__)
 
-IMAGE_DIRECTORY = os.path.join(os.path.dirname(__file__), "resources")
+IMAGE_DIRECTORY = os.path.join(application_path, "resources")
 
 
 class FrmTagViewer(QFrame):
