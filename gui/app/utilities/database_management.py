@@ -132,7 +132,7 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				cur.execute("SELECT * FROM settings")
+				cur.execute("SELECT * FROM SystemSettings")
 
 				rows = cur.fetchall()
 
@@ -209,7 +209,7 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				cur.execute("UPDATE settings SET mongodbconnection=\"" + settings_info + "\"")
+				cur.execute("UPDATE SystemSettings SET MongoDBAddress=\"" + settings_info + "\"")
 				self.connection.commit()
 				return cur.lastrowid
 

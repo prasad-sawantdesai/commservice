@@ -33,7 +33,7 @@ class FrmAddTags(QDialog):
 				self.form_layout_tag_info.addRow(QLabel("Scaling:"), self.scaling)
 
 				self.data_types = QComboBox()
-				self.data_types.addItems(["Integer", "Float", "Boolean"])
+				self.data_types.addItems(["uint8","int16", "int32", "float32"])
 				self.form_layout_tag_info.addRow(QLabel("Data type:"), self.data_types)
 
 				self.data_size = QLineEdit()
