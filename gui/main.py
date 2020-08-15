@@ -10,7 +10,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Signal
 from PySide2.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel, Qt
 from PySide2.QtWidgets import QAction, QApplication, QFrame, QHBoxLayout, QMainWindow, QMenu, QMessageBox, \
-		QSplashScreen, QSplitter, QTreeView, QWidget, QFileDialog
+		QSplashScreen, QSplitter, QTreeView, QWidget, QFileDialog, QDialog
 
 from app.presenter.view.frm_add_machine import FrmAddMachine
 from app.presenter.view.frm_add_modbusrtu_connection import FrmAddModbusRtuConnection
@@ -18,14 +18,18 @@ from app.presenter.view.frm_add_modbustcp_connection import FrmAddModbusTcpConne
 from app.presenter.view.frm_add_register_types import FrmAddRegisterTypes
 from app.presenter.view.frm_add_tag_groups import FrmTagGroups
 from app.presenter.view.frm_add_tags import FrmAddTags
+from app.presenter.view.frm_add_user import FrmAddUser
 from app.presenter.view.frm_addcontroller import FrmAddController
 from app.presenter.view.frm_adddriver import FrmAddDriver
+from app.presenter.view.frm_delete_user import FrmDeleteUser
 from app.presenter.view.frm_edit_machine import FrmEditMachine
 from app.presenter.view.frm_edit_modbusrtu_connection import FrmEditModbusRtuConnection
 from app.presenter.view.frm_edit_modbustcp_connection import FrmEditModbusTcpConnection
 from app.presenter.view.frm_edit_settings import FrmEditSettings
 from app.presenter.view.frm_edit_tag_groups import FrmEditTagGroups
+from app.presenter.view.frm_edit_user import FrmEditUser
 from app.presenter.view.frm_editcontroller import FrmEditController
+from app.presenter.view.frm_login import FrmLogin
 from app.presenter.view.frm_tag_mapping import FrmTagMapping
 from frm_tag_viewer import FrmTagViewer
 from app.utilities.configfilereader import ConfigFileReader
@@ -34,7 +38,7 @@ from app.utilities.database_management import DatabaseManagement
 logger = logging.getLogger(__name__)
 
 # Get application executable path
-application_path=""
+application_path = ""
 if getattr(sys, 'frozen', False):
 		application_path = os.path.dirname(sys.executable)
 elif __file__:
@@ -52,13 +56,19 @@ class MainWindow(QMainWindow):
 				self.selected_plc = None
 				self.selected_connection = None
 				self.selected_group_id = None
+				self.selected_user = None
 
 		def start(self):
 				self.InitConfig()
 				self.set_window_properties()
 
 				self.InitMainWindow()
+
 				self.initUI()
+				self.InitLogin()
+
+		def InitLogin(self):
+				self.show_login_screen()
 
 		def InitConfig(self):
 				# Read Configuration file
@@ -73,12 +83,13 @@ class MainWindow(QMainWindow):
 
 				DatabaseManagement.db_file_path = config_file_reader.database_path
 				if not os.path.exists(config_file_reader.database_path):
-						QMessageBox.warning(self, 'Database file error', "Database file not found.. Select database in next window",
+						QMessageBox.warning(self, 'Database file error', "Database file not found.. Select database in next "
+																														 "window",
 																QMessageBox.Ok)
 						database_filepath = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\', "Database files (*.db )")
 						config_object = ConfigParser()
 						config_object["database"] = {
-								"path"   : database_filepath[0],
+								"path": database_filepath[0],
 						}
 						config_file_reader.database_path = database_filepath[0]
 						DatabaseManagement.db_file_path = config_file_reader.database_path
@@ -251,7 +262,7 @@ class MainWindow(QMainWindow):
 						ctx_menu.exec_(event.globalPos())
 						controllers_node = self.tv_config_explorer_model.itemFromIndex(index_component_name.parent())
 						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(
-								index_component_name.parent()),
+										index_component_name.parent()),
 																										 index_component_name.parent())
 						self.refresh_controllers(controllers_node)
 				elif index_component_name.parent().parent().data() == "Controllers":
@@ -268,7 +279,7 @@ class MainWindow(QMainWindow):
 						ctx_menu.exec_(event.globalPos())
 						controllers_node = self.tv_config_explorer_model.itemFromIndex(index_component_name.parent().parent())
 						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(
-								index_component_name.parent().parent()),
+										index_component_name.parent().parent()),
 																										 index_component_name.parent().parent())
 						self.refresh_controllers(controllers_node)
 				elif index_component_name.parent().data() == "Machines":
@@ -279,9 +290,9 @@ class MainWindow(QMainWindow):
 
 						ctx_menu.exec_(event.globalPos())
 						controllers_node = self.tv_config_explorer_model.itemFromIndex(
-								index_component_name.parent().parent().parent())
+										index_component_name.parent().parent().parent())
 						self.tv_config_explorer_model.removeRows(0, self.tv_config_explorer_model.rowCount(
-								index_component_name.parent().parent().parent()),
+										index_component_name.parent().parent().parent()),
 																										 index_component_name.parent().parent().parent())
 						self.refresh_controllers(controllers_node)
 				elif index_component_name.parent().data() == "Connections":
@@ -323,8 +334,6 @@ class MainWindow(QMainWindow):
 										index_component_name.parent()), index_component_name.parent())
 						self.refresh_taggroups(taggroups_node)
 				return
-
-
 
 		def initUI(self):
 				exitAct = QAction(QIcon('exit.png'), '&Exit', self)
@@ -387,8 +396,22 @@ class MainWindow(QMainWindow):
 				settingsAct.setStatusTip('Update settings')
 				settingsAct.triggered.connect(self.show_frm_settings)
 
-				self.statusBar().showMessage('Ready')
+				adduserAct = QAction(QIcon('add.png'), '&Add User', self)
+				# addModbusTcpAct.setShortcut('Ctrl+M')
+				adduserAct.setStatusTip('Add User')
+				adduserAct.triggered.connect(self.show_frm_add_user)
 
+				edituserAct = QAction(QIcon('add.png'), '&Edit User', self)
+				# addModbusTcpAct.setShortcut('Ctrl+M')
+				edituserAct.setStatusTip('Edit User')
+				edituserAct.triggered.connect(self.show_frm_edit_user)
+
+				deleteuserAct = QAction(QIcon('add.png'), '&Delete User', self)
+				# addModbusTcpAct.setShortcut('Ctrl+M')
+				deleteuserAct.setStatusTip('Delete User')
+				deleteuserAct.triggered.connect(self.show_frm_delete_user)
+
+				self.statusBar().showMessage("Ready")
 				# self.toolbar = self.addToolBar('Exit')
 				# self.toolbar.addAction(exitAct)
 
@@ -411,11 +434,16 @@ class MainWindow(QMainWindow):
 				configMenu.addAction(addTagMappingAct)
 				configMenu.addAction(settingsAct)
 
+				self.userManagementMenu = configMenu.addMenu('&User Management')
+				self.userManagementMenu.addAction(adduserAct)
+				self.userManagementMenu.addAction(edituserAct)
+				self.userManagementMenu.addAction(deleteuserAct)
+
 				windowMenu = menubar.addMenu('&Window')
 
 				helpMenu = menubar.addMenu('&Help')
 				self.showMaximized()
-				self.setWindowTitle('X-Box Configurator')
+				self.setWindowTitle('X-Board Configurator')
 				self.show()
 
 		def set_window_properties(self):
@@ -544,6 +572,24 @@ class MainWindow(QMainWindow):
 				dialog.show()
 				dialog.exec_()
 
+		def show_frm_add_user(self):
+				dialog = FrmAddUser()
+				dialog.setModal(True)
+				dialog.show()
+				dialog.exec_()
+
+		def show_frm_edit_user(self):
+				dialog = FrmEditUser()
+				dialog.setModal(True)
+				dialog.show()
+				dialog.exec_()
+
+		def show_frm_delete_user(self):
+				dialog = FrmDeleteUser()
+				dialog.setModal(True)
+				dialog.show()
+				dialog.exec_()
+
 		def show_frm_add_tag_mapping(self):
 				dialog = FrmTagMapping()
 				dialog.setModal(True)
@@ -555,6 +601,20 @@ class MainWindow(QMainWindow):
 				dialog.setModal(True)
 				dialog.show()
 				dialog.exec_()
+
+		def show_login_screen(self):
+				dialog = FrmLogin()
+				dialog.setModal(True)
+				dialog.show()
+				if dialog.exec_() == QDialog.Accepted:
+						self.selected_user = dialog.selected_user
+						if self.selected_user[0][3] == 'admin':
+								self.userManagementMenu.setEnabled(True)
+						else:
+								self.userManagementMenu.setEnabled(False)
+						self.setWindowTitle("X-Board Configurator - " + self.selected_user[0][1])
+				else:
+						sys.exit(0)
 
 
 def main():

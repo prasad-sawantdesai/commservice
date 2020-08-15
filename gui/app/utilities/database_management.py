@@ -561,3 +561,96 @@ class DatabaseManagement:
 				cur.execute("UPDATE tags SET name=\"" + tag_info[0] + "\", register_typeid=" + str(tag_info[1]) + ", address=" + str(tag_info[2]) + ", scaling=" + str(tag_info[3]) + ", data_type=\"" + str(tag_info[4]) + "\", data_size=" + str(tag_info[5]) + " WHERE id=" + str(id))
 				self.connection.commit()
 				return cur.lastrowid
+
+		def select_user(self, user_info):
+				cur = self.connection.cursor()
+				cur.execute("SELECT user_details.id as ID, user_details.name as Name, user_details.password as password, user_roles.name as role from user_details, user_roles where user_details.roleid =user_roles.id and user_details.name=\"" + user_info[0] + "\" and user_details.password=\"" + user_info[1] + "\"")
+
+				rows = cur.fetchall()
+
+				return rows
+
+		def create_user(self, user):
+				"""
+				Create a new project into the projects table
+				:param conn:
+				:param controller:
+				:return: controller id
+				"""
+				sql = ''' INSERT INTO user_details(name,password, roleid)
+									VALUES(?,?,?) '''
+				cur = self.connection.cursor()
+				cur.execute(sql, user)
+				self.connection.commit()
+				return cur.lastrowid
+
+		def get_user_role_index(self, role_name):
+				cur = self.connection.cursor()
+				cur.execute("SELECT id FROM user_roles where name=\"" + role_name + "\"")
+
+				rows = cur.fetchall()
+
+				return rows
+
+		def select_all_users(self):
+				"""
+				Query all rows in the tasks table
+				:param conn: the Connection object
+				:return:
+				"""
+				cur = self.connection.cursor()
+				cur.execute("SELECT * FROM user_details")
+
+				rows = cur.fetchall()
+
+				return rows
+
+		def select_user_by_name(self, name):
+				cur = self.connection.cursor()
+				cur.execute(
+						"SELECT user_details.id as ID, user_details.name as Name, user_details.password as password, "
+						"user_roles.name as role from user_details, user_roles where user_details.roleid =user_roles.id and "
+						"user_details.name=\"" +
+					  name +"\"")
+
+				rows = cur.fetchall()
+				return rows
+
+		def delete_user_by_id(self, id):
+				"""
+				Query all rows in the tasks table
+				:param conn: the Connection object
+				:return:
+				"""
+				cur = self.connection.cursor()
+				sql = "DELETE from user_details WHERE id=?"
+				cur.execute(sql, (id,))
+				self.connection.commit()
+				return cur.lastrowid
+
+		def update_user_by_id(self, user_info, id):
+				"""
+				Query all rows in the tasks table
+				:param conn: the Connection object
+				:return:
+				"""
+				cur = self.connection.cursor()
+				cur.execute("UPDATE user_details SET name=\"" + user_info[0] + "\", password=\"" + str(user_info[1]) + "\", roleid=" + str(user_info[2]) + " WHERE id=" + str(id) )
+				self.connection.commit()
+				return cur.lastrowid
+
+		def get_user_index(self, name):
+				cur = self.connection.cursor()
+				cur.execute("SELECT id FROM user_details where name=\"" + name + "\"")
+
+				rows = cur.fetchall()
+
+				return rows
+
+		def get_role_index(self, name):
+				cur = self.connection.cursor()
+				cur.execute("SELECT id FROM user_roles where name=\"" + name + "\"")
+
+				rows = cur.fetchall()
+
+				return rows
