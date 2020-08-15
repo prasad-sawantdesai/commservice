@@ -1,0 +1,5 @@
+1. Install Python version 3.7.5
+2. Create virtual environment in Linux
+3. Add requirements in the environment "pip install -r requirements.txt"
+4. Edit paths in x-boardconfigurator.sh
+5. Run ./x-boardconfigurator.sh
