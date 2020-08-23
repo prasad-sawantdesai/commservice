@@ -1,0 +1,24 @@
+Installation steps
+1) Open Terminal
+2) By default it is opened in user's home directory, if not change it to home directory
+cd ~
+3) Create directory git_repo 
+mkdir git_repo
+4) Change directory to git_repo
+cd git_repo
+5) Copy git project on gateway. [Please keep copy of the project or repository at your side] It can also be copied from USB stick
+git clone https://github.com/prasad-sawantdesai/commservice.git
+6) Copy installer folder from git_repo > commservice >installer to user's home directory [cd /home/<username>/ ]
+7) Open x-boardconfigurator.sh from installer folder and change username [Replace x-board with user name] and save it
+8) Open commservice.sh from installer folder and change username [Replace x-board with user name] and save it
+Database is also configured here to start communication service with PLC
+9) Install all required libraries
+cd ~/installer
+sudo ./x-boardserviceinstaller.sh
+10) Installation is done
+
+* commservice will run automatically as a service, even it will run on boot
+* To run GUI on Linux
+1) Open Terminal
+2) cd ~/installer
+3) sudo ./x-boardconfigurator.sh
