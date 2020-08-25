@@ -15,15 +15,16 @@ sudo apt-get install libbson-1.0
 sudo apt-get install libmongoc-1.0-0
 sudo apt install python3-virtualenv
 
+# Create Comm Service at boot up
+chmod u+x /home/x-board/installer/commservice.sh
+sudo cp /home/x-board/installer/commservice.service /etc/systemd/system/commservice.service
+sudo systemctl start commservice
+sudo systemctl enable commservice
+
 # Installatoin of virtual environment
-cd ~
+cd /home/x-board/
 mkdir python3_virtualenv
 cd python3_virtualenv/
 virtualenv -p /usr/bin/python3 commservice_env
+source /home/x-board/python3_virtualenv/commservice_env/bin/activate
 pip install -r requirements.txt
-
-# Create Comm Service at boot up
-chmod u+x ~/installer/commservice.sh
-sudo cp ~/installer/commservice.service /etc/systemd/system/commservice.service
-sudo systemctl start commservice
-sudo systemctl enable commservice
