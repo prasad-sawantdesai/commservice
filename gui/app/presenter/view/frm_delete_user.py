@@ -1,10 +1,11 @@
 import sys
-
+import logging
 from PySide2.QtWidgets import QApplication, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QGroupBox, QLabel, \
 		QLineEdit, QMessageBox, QVBoxLayout
 
 from app.utilities.database_management import DatabaseManagement
-
+import internalconfig
+logger = logging.getLogger(__name__)
 
 class FrmDeleteUser(QDialog):
 
@@ -40,6 +41,7 @@ class FrmDeleteUser(QDialog):
 		def store(self):
 				try:
 						obj_db_management = DatabaseManagement.get_instance()
+						logger.info(self.user_collection.currentText() + ' - User is deleting ' + " by " + internalconfig.xboard_user_name)
 						user_index = obj_db_management.get_user_index(self.user_collection.currentText())
 						obj_db_management.delete_user_by_id(user_index[0][0])
 						QMessageBox.information(self, 'User', "User deleted successfully",
