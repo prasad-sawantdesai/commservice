@@ -1,7 +1,9 @@
+import logging
 import sqlite3
-from sqlite3 import Error
-
+import internalconfig
 from PySide2.QtWidgets import QMessageBox
+
+logger = logging.getLogger(__name__)
 
 
 class DatabaseManagement:
@@ -51,6 +53,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute(sql, controller)
 				self.connection.commit()
+				logger.info(controller[0] + ' - controller  is created ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def get_plc_index(self, controller_name):
@@ -81,6 +84,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute(sql, driver)
 				self.connection.commit()
+				logger.info(driver[0] + " and " + driver[1] + ' - driver  is created ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def create_connection(self, connection):
@@ -95,6 +99,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute(sql, connection)
 				self.connection.commit()
+				logger.info(connection[0] + ' - connection string  is created ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def select_all_connections(self, plcfilter = None):
@@ -171,8 +176,13 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				# select taggroups.id, taggroups.name,controller.name,machine.name,taggroups.collection_method, taggroups.collection_type   from taggroups, controller, machine where taggroups.plcid = controller.id and taggroups.machineid = machine.id
-				cur.execute("SELECT taggroups.id, taggroups.name,controller.name,machine.name,taggroups.collection_method, taggroups.collection_type FROM taggroups, controller, machine where taggroups.id=" + str(id) + " and taggroups.plcid = controller.id and taggroups.machineid = machine.id")
+				# select taggroups.id, taggroups.name,controller.name,machine.name,taggroups.collection_method,
+				# taggroups.collection_type   from taggroups, controller, machine where taggroups.plcid = controller.id and
+				# taggroups.machineid = machine.id
+				cur.execute(
+						"SELECT taggroups.id, taggroups.name,controller.name,machine.name,taggroups.collection_method, "
+						"taggroups.collection_type FROM taggroups, controller, machine where taggroups.id=" + str(
+								id) + " and taggroups.plcid = controller.id and taggroups.machineid = machine.id")
 
 				rows = cur.fetchall()
 
@@ -198,8 +208,10 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				cur.execute("UPDATE controller SET name=\"" + controller_info[0] + "\", description=\"" + controller_info[1] + "\" WHERE id=" + str(id) )
+				cur.execute("UPDATE controller SET name=\"" + controller_info[0] + "\", description=\"" + controller_info[
+						1] + "\" WHERE id=" + str(id))
 				self.connection.commit()
+				logger.info(controller_info[0] + ' - controller  is updated ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def update_settings(self, settings_info):
@@ -211,6 +223,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute("UPDATE SystemSettings SET MongoDBAddress=\"" + settings_info + "\"")
 				self.connection.commit()
+				logger.info(settings_info[0] + ' - SystemSettings  is updated ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def update_taggroup_by_id(self, taggroup_info, id):
@@ -220,8 +233,11 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				cur.execute("UPDATE taggroups SET name=\"" + taggroup_info[0] + "\", plcid=" + str(taggroup_info[1]) + " ,machineid=" + str(taggroup_info[2]) + ", collection_method=" + str(taggroup_info[3]) + ", collection_type=\"" + taggroup_info[4] + "\" WHERE id=" + str(id) )
+				cur.execute("UPDATE taggroups SET name=\"" + taggroup_info[0] + "\", plcid=" + str(
+								taggroup_info[1]) + " ,machineid=" + str(taggroup_info[2]) + ", collection_method=" + str(
+								taggroup_info[3]) + ", collection_type=\"" + taggroup_info[4] + "\" WHERE id=" + str(id))
 				self.connection.commit()
+				logger.info(taggroup_info[0] + ' - Tag group  is updated ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def update_machine_by_id(self, machine_info, id):
@@ -231,8 +247,11 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				cur.execute("UPDATE machine SET name=\"" + machine_info[0] + "\", manualid=" + str(machine_info[1]) + ", plcid=" + str(machine_info[2]) + " WHERE id=" + str(id) )
+				cur.execute(
+						"UPDATE machine SET name=\"" + machine_info[0] + "\", manualid=" + str(machine_info[1]) + ", plcid=" + str(
+										machine_info[2]) + " WHERE id=" + str(id))
 				self.connection.commit()
+				logger.info(machine_info[0] + ' - Machine Info  is updated ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def update_connection_by_id(self, connection_info, id):
@@ -242,8 +261,10 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				cur.execute("UPDATE connection SET connection_string=\"" + connection_info[0] + "\", driverid=\"" + str(connection_info[1]) + "\", plcid=\"" + str(connection_info[2]) + "\" WHERE id=" + str(id))
+				cur.execute("UPDATE connection SET connection_string=\"" + connection_info[0] + "\", driverid=\"" + str(
+								connection_info[1]) + "\", plcid=\"" + str(connection_info[2]) + "\" WHERE id=" + str(id))
 				self.connection.commit()
+				logger.info(str(connection_info[0]) + ' - Connection Info  is updated ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def delete_controller_by_id(self, id):
@@ -256,6 +277,7 @@ class DatabaseManagement:
 				sql = "DELETE from controller WHERE id=?"
 				cur.execute(sql, (id,))
 				self.connection.commit()
+				logger.info(str(id) + ' - Connection  is deleted ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def delete_taggroup_by_id(self, id):
@@ -268,6 +290,7 @@ class DatabaseManagement:
 				sql = "DELETE from taggroups WHERE id=?"
 				cur.execute(sql, (id,))
 				self.connection.commit()
+				logger.info(str(id) + ' - Tag Group  is deleted ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def delete_machine_by_id(self, id):
@@ -280,6 +303,7 @@ class DatabaseManagement:
 				sql = "DELETE from machine WHERE id=?"
 				cur.execute(sql, (id,))
 				self.connection.commit()
+				logger.info(str(id) + ' - Machine  is deleted ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def delete_connection_by_id(self, id):
@@ -292,6 +316,7 @@ class DatabaseManagement:
 				sql = "DELETE from connection WHERE id=?"
 				cur.execute(sql, (id,))
 				self.connection.commit()
+				logger.info(str(id) + ' - Connection  is deleted ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def select_all_drivers(self):
@@ -327,6 +352,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute(sql, machine)
 				self.connection.commit()
+				logger.info(machine[0] + ' - Machine  is created ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def select_all_machines(self, plcfilter = None):
@@ -356,6 +382,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute(sql, register_type)
 				self.connection.commit()
+				logger.info(register_type[0] + ' - Register type  is created ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def select_all_register_types(self):
@@ -391,6 +418,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute(sql, tag)
 				self.connection.commit()
+				logger.info(tag[0] + ' - Tag  is created ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def get_tag_index(self, tag_name):
@@ -414,16 +442,28 @@ class DatabaseManagement:
 
 				return rows
 
-		def select_all_tags_for_display(self, filter=None):
+		def select_all_tags_for_display(self, filter = None):
 				cur = self.connection.cursor()
 				if filter is None:
-						cur.execute("select tags.id as 'ID', tags.name as 'TagName' ,controller.name as 'Controller Name', machine.name as 'Machine Name',register_types.ragister_type as 'Register Type', tags.data_type as 'Data type' from tag_group_mapping, taggroups, tags, controller, machine, register_types where tag_group_mapping.tag_group_id = taggroups.id and tags.id = tag_group_mapping.tag_id and taggroups.plcid=controller.id and taggroups.machineid=machine.id and tags.register_typeid=register_types.id")
+						cur.execute(
+								"select tags.id as 'ID', tags.name as 'TagName' ,controller.name as 'Controller Name', machine.name as "
+								"'Machine Name',register_types.ragister_type as 'Register Type', tags.data_type as 'Data type' from "
+								"tag_group_mapping, taggroups, tags, controller, machine, register_types where "
+								"tag_group_mapping.tag_group_id = taggroups.id and tags.id = tag_group_mapping.tag_id and "
+								"taggroups.plcid=controller.id and taggroups.machineid=machine.id and "
+								"tags.register_typeid=register_types.id")
 				else:
-						cur.execute("select tags.id as 'ID', tags.name as 'TagName' ,controller.name as 'Controller Name', machine.name as 'Machine Name',register_types.ragister_type as 'Register Type', tags.data_type as 'Data type' from tag_group_mapping, taggroups, tags, controller, machine, register_types where tag_group_mapping.tag_group_id = taggroups.id and tags.id = tag_group_mapping.tag_id and taggroups.plcid=controller.id and taggroups.machineid=machine.id and tags.register_typeid=register_types.id and taggroups.id=\"" + str(filter) + "\"")
+						cur.execute(
+								"select tags.id as 'ID', tags.name as 'TagName' ,controller.name as 'Controller Name', machine.name as "
+								"'Machine Name',register_types.ragister_type as 'Register Type', tags.data_type as 'Data type' from "
+								"tag_group_mapping, taggroups, tags, controller, machine, register_types where "
+								"tag_group_mapping.tag_group_id = taggroups.id and tags.id = tag_group_mapping.tag_id and "
+								"taggroups.plcid=controller.id and taggroups.machineid=machine.id and "
+								"tags.register_typeid=register_types.id and taggroups.id=\"" + str(
+										filter) + "\"")
 				rows = cur.fetchall()
 
 				return rows
-
 
 		def create_tag_group(self, tag_group):
 				"""
@@ -437,6 +477,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute(sql, tag_group)
 				self.connection.commit()
+				logger.info(tag_group[0] + ' - Tag group is created ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def select_all_tag_groups(self):
@@ -468,7 +509,6 @@ class DatabaseManagement:
 
 				return rows
 
-
 		def create_tag_mapping(self, tag_mapping):
 				"""
 				Create a new project into the projects table
@@ -480,6 +520,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute(sql, tag_mapping)
 				self.connection.commit()
+				logger.info(str(tag_mapping[0]) + " and " + str(tag_mapping[1]) +' - Tag Mapping is created ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def get_tag_group_index(self, tag_group_name):
@@ -511,7 +552,7 @@ class DatabaseManagement:
 						cur.execute("DELETE * FROM tag_group_mapping where tag_group_id=\"" + tagfilter + "\"")
 
 				rows = cur.fetchall()
-
+				logger.info(str(tagfilter) + ' - Tag Mapping is deleted ' + " by " + internalconfig.xboard_user_name)
 				return rows
 
 		def select_tag_by_id(self, id):
@@ -521,7 +562,11 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				cur.execute("select tags.id as 'ID',tags.name as 'Name',register_types.ragister_type as 'RegisterType', tags.address as 'Address', tags.scaling as 'Scaling', tags.data_type as 'DataType',tags.data_size as 'DataSize' from tags,register_types where register_types.id = tags.register_typeid and tags.id=" + str(id) )
+				cur.execute(
+						"select tags.id as 'ID',tags.name as 'Name',register_types.ragister_type as 'RegisterType', tags.address "
+						"as 'Address', tags.scaling as 'Scaling', tags.data_type as 'DataType',tags.data_size as 'DataSize' from "
+						"tags,register_types where register_types.id = tags.register_typeid and tags.id=" + str(
+								id))
 
 				rows = cur.fetchall()
 
@@ -537,6 +582,7 @@ class DatabaseManagement:
 				sql = "DELETE from tags WHERE id=?"
 				cur.execute(sql, (id,))
 				self.connection.commit()
+				logger.info(str(id) + ' - Tag is deleted ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def delete_tagmapping_by_taggroupid(self, taggroupid):
@@ -558,13 +604,21 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				cur.execute("UPDATE tags SET name=\"" + tag_info[0] + "\", register_typeid=" + str(tag_info[1]) + ", address=" + str(tag_info[2]) + ", scaling=" + str(tag_info[3]) + ", data_type=\"" + str(tag_info[4]) + "\", data_size=" + str(tag_info[5]) + " WHERE id=" + str(id))
+				cur.execute(
+						"UPDATE tags SET name=\"" + tag_info[0] + "\", register_typeid=" + str(tag_info[1]) + ", address=" + str(
+										tag_info[2]) + ", scaling=" + str(tag_info[3]) + ", data_type=\"" + str(
+										tag_info[4]) + "\", data_size=" + str(tag_info[5]) + " WHERE id=" + str(id))
 				self.connection.commit()
+				logger.info(tag_info[0] + ' - Tag is updated ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def select_user(self, user_info):
 				cur = self.connection.cursor()
-				cur.execute("SELECT user_details.id as ID, user_details.name as Name, user_details.password as password, user_roles.name as role from user_details, user_roles where user_details.roleid =user_roles.id and user_details.name=\"" + user_info[0] + "\" and user_details.password=\"" + user_info[1] + "\"")
+				cur.execute(
+						"SELECT user_details.id as ID, user_details.name as Name, user_details.password as password, "
+						"user_roles.name as role from user_details, user_roles where user_details.roleid =user_roles.id and "
+						"user_details.name=\"" +
+						user_info[0] + "\" and user_details.password=\"" + user_info[1] + "\"")
 
 				rows = cur.fetchall()
 
@@ -582,6 +636,7 @@ class DatabaseManagement:
 				cur = self.connection.cursor()
 				cur.execute(sql, user)
 				self.connection.commit()
+				logger.info(user[0] + ' - user is created ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def get_user_role_index(self, role_name):
@@ -608,10 +663,10 @@ class DatabaseManagement:
 		def select_user_by_name(self, name):
 				cur = self.connection.cursor()
 				cur.execute(
-						"SELECT user_details.id as ID, user_details.name as Name, user_details.password as password, "
-						"user_roles.name as role from user_details, user_roles where user_details.roleid =user_roles.id and "
-						"user_details.name=\"" +
-					  name +"\"")
+								"SELECT user_details.id as ID, user_details.name as Name, user_details.password as password, "
+								"user_roles.name as role from user_details, user_roles where user_details.roleid =user_roles.id and "
+								"user_details.name=\"" +
+								name + "\"")
 
 				rows = cur.fetchall()
 				return rows
@@ -626,6 +681,7 @@ class DatabaseManagement:
 				sql = "DELETE from user_details WHERE id=?"
 				cur.execute(sql, (id,))
 				self.connection.commit()
+				logger.info(str(id) + ' - user is deleted ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def update_user_by_id(self, user_info, id):
@@ -635,8 +691,10 @@ class DatabaseManagement:
 				:return:
 				"""
 				cur = self.connection.cursor()
-				cur.execute("UPDATE user_details SET name=\"" + user_info[0] + "\", password=\"" + str(user_info[1]) + "\", roleid=" + str(user_info[2]) + " WHERE id=" + str(id) )
+				cur.execute("UPDATE user_details SET name=\"" + user_info[0] + "\", password=\"" + str(
+								user_info[1]) + "\", roleid=" + str(user_info[2]) + " WHERE id=" + str(id))
 				self.connection.commit()
+				logger.info(user_info[0] + ' - user is updated ' + " by " + internalconfig.xboard_user_name)
 				return cur.lastrowid
 
 		def get_user_index(self, name):

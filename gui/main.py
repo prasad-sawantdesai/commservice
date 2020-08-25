@@ -12,6 +12,7 @@ from PySide2.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel, Qt
 from PySide2.QtWidgets import QAction, QApplication, QFrame, QHBoxLayout, QMainWindow, QMenu, QMessageBox, \
 		QSplashScreen, QSplitter, QTreeView, QWidget, QFileDialog, QDialog
 
+import internalconfig
 from app.presenter.view.frm_add_machine import FrmAddMachine
 from app.presenter.view.frm_add_modbusrtu_connection import FrmAddModbusRtuConnection
 from app.presenter.view.frm_add_modbustcp_connection import FrmAddModbusTcpConnection
@@ -52,6 +53,9 @@ class MainWindow(QMainWindow):
 
 		def __init__(self):
 				super().__init__()
+				internalconfig.xboard_user_name = "unknown"
+				setup_logger(False)
+				logger.info('Application is started')
 				self.selected_item_id = None
 				self.selected_plc = None
 				self.selected_connection = None
@@ -472,6 +476,7 @@ class MainWindow(QMainWindow):
 
 		def delete_controller(self):
 				obj_db_management = DatabaseManagement.get_instance()
+				logger.info(str(self.selected_item_id) + ' - Controller is deleting ' + " by " + internalconfig.xboard_user_name)
 				obj_db_management.delete_controller_by_id(self.selected_item_id)
 				QMessageBox.information(self, 'Controller', "Controller deleted successfully",
 																QMessageBox.Ok)
@@ -496,6 +501,8 @@ class MainWindow(QMainWindow):
 
 		def delete_machine(self):
 				obj_db_management = DatabaseManagement.get_instance()
+				logger.info(
+						str(self.selected_item_id) + ' - Machine is deleting ' + " by " + internalconfig.xboard_user_name)
 				obj_db_management.delete_machine_by_id(self.selected_item_id)
 				QMessageBox.information(self, 'Machine', "Machine deleted successfully",
 																QMessageBox.Ok)
@@ -508,12 +515,16 @@ class MainWindow(QMainWindow):
 
 		def delete_connection(self):
 				obj_db_management = DatabaseManagement.get_instance()
+				logger.info(
+						str(self.selected_item_id) + ' - Connection is deleting ' + " by " + internalconfig.xboard_user_name)
 				obj_db_management.delete_connection_by_id(self.selected_item_id)
 				QMessageBox.information(self, 'Connection', "Connection deleted successfully",
 																QMessageBox.Ok)
 
 		def delete_taggroup(self):
 				obj_db_management = DatabaseManagement.get_instance()
+				logger.info(
+						str(self.selected_item_id) + ' - Tag group is deleting ' + " by " + internalconfig.xboard_user_name)
 				obj_db_management.delete_taggroup_by_id(self.selected_item_id)
 				QMessageBox.information(self, 'Tag Group', "Tag Group deleted successfully",
 																QMessageBox.Ok)
@@ -613,8 +624,40 @@ class MainWindow(QMainWindow):
 						else:
 								self.userManagementMenu.setEnabled(False)
 						self.setWindowTitle("X-Board Configurator - " + self.selected_user[0][1])
+						internalconfig.xboard_user_name = self.selected_user[0][1]
 				else:
 						sys.exit(0)
+
+
+def setup_logger(is_debugging_needed):
+		logging_path = os.path.join(application_path, r"logs")
+		if not os.path.exists(logging_path):
+				os.makedirs(logging_path)
+		# setup file logger
+		log_filename = r".\logs\x-board_" + time.strftime("%Y%m%d_%H%M%S") + \
+									 ".log"
+		debugging_option = logging.INFO
+
+		if is_debugging_needed is True:
+				debugging_option = logging.DEBUG
+		logging.basicConfig(filename = log_filename, format = '%(asctime)s, '
+																													'[%(levelname)s], '
+																													'%(name)s, '
+																													'%(message)s',
+												level = logging.DEBUG)
+
+		# setup console logger
+		console = logging.StreamHandler()
+		console.setLevel(debugging_option)
+		formatter = logging.Formatter('%(asctime)s, ' '[%(levelname)s], '
+																	'%(name)s:, %(message)s')
+		console.setFormatter(formatter)
+
+		logging.getLogger('').addHandler(console)
+
+		# Suppress warnings in weasyprint & matplotlib.font_manager modules
+		logging.getLogger('weasyprint').setLevel(logging.CRITICAL)
+		logging.getLogger('matplotlib.font_manager').setLevel(logging.CRITICAL)
 
 
 def main():
