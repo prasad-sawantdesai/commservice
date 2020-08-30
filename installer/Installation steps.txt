@@ -1,4 +1,4 @@
-Installation steps
+Installation steps for comm service
 1) Open Terminal
 2) By default it is opened in user's home directory, if not change it to home directory
 cd ~
@@ -6,16 +6,24 @@ cd ~
 mkdir git_repo
 4) Change directory to git_repo
 cd git_repo
-5) Copy git project on gateway. [Please keep copy of the project or repository at your side] It can also be copied from USB stick
+5) Get git project. [Please keep copy of the project or repository at your side] It can also be copied from USB stick
 git clone https://github.com/prasad-sawantdesai/commservice.git
 6) Copy installer folder from git_repo > commservice >installer to user's home directory [cd /home/<username>/ ]
-7) Open x-boardconfigurator.sh from installer folder and change username [Replace x-board with user name] and save it
-8) Open commservice.sh from installer folder and change username [Replace x-board with user name] and save it
+7) Open x-boardserviceinstaller.sh, x-boardconfigurator.sh, commservice.sh, commservice.service from installer folder and change username [Replace x-board with user name] and save it
+8) Select database in commservice.sh, if it is different
 Database is also configured here to start communication service with PLC
-9) Install all required libraries
+9) Install all required libraries by using following commands
 cd ~/installer
+chmod 777 x-boardserviceinstaller.sh
 sudo ./x-boardserviceinstaller.sh
 10) Installation is done
+if error comes then just reload services using following command
+systemctl daemon-reload
+
+Installation steps for Robo3t for MongoDB database
+https://robomongo.org/download
+Select Robo 3T (formerly Robomongo)
+Please follow documentation mongodb_setup.rtf
 
 * commservice will run automatically as a service, even it will run on boot
 * To run GUI on Linux

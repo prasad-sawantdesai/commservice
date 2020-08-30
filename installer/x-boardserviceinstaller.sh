@@ -16,7 +16,9 @@ sudo apt-get install libmongoc-1.0-0
 sudo apt install python3-virtualenv
 
 # Create Comm Service at boot up
-chmod u+x /home/x-board/installer/commservice.sh
+chmod 777 /home/x-board/installer/commservice
+chmod 777 /home/x-board/installer/commservice.sh
+chmod 777 /home/x-board/installer/commservice.service
 sudo cp /home/x-board/installer/commservice.service /etc/systemd/system/commservice.service
 sudo systemctl start commservice
 sudo systemctl enable commservice
@@ -29,3 +31,4 @@ virtualenv -p /usr/bin/python3 commservice_env
 source /home/x-board/python3_virtualenv/commservice_env/bin/activate
 cd /home/x-board/installer
 pip install -r requirements.txt
+chmod u+x /home/x-board/installer/x-boardconfigurator.sh

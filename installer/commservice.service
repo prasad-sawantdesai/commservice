@@ -2,7 +2,7 @@
 Description=Communication service to get data from PLCs
 
 [Service]
-ExecStart=~/installer/commservice.sh
+ExecStart=/home/x-board/installer/commservice.sh
 TimeoutSec=30
 Restart=on-failure
 RestartSec=30
