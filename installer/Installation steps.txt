@@ -2,12 +2,16 @@ Installation steps for comm service
 1) Open Terminal
 2) By default it is opened in user's home directory, if not change it to home directory
 cd ~
+3) Copy git_repo folder from USB in home folder
+or 
 3) Create directory git_repo 
 mkdir git_repo
 4) Change directory to git_repo
 cd git_repo
 5) Get git project. [Please keep copy of the project or repository at your side] It can also be copied from USB stick
 git clone https://github.com/prasad-sawantdesai/commservice.git
+
+
 6) Copy installer folder from git_repo > commservice >installer to user's home directory [cd /home/<username>/ ]
 7) Open x-boardserviceinstaller.sh, x-boardconfigurator.sh, commservice.sh, commservice.service from installer folder and change username [Replace x-board with user name] and save it
 8) Select database in commservice.sh, if it is different
