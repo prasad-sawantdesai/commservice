@@ -24,11 +24,12 @@ sudo ./x-boardserviceinstaller.sh
 if error comes then just reload services using following command
 systemctl daemon-reload
 
-Installation steps for Robo3t for MongoDB database
+** Installation steps for Robo3t for MongoDB database
 https://robomongo.org/download
 Select Robo 3T (formerly Robomongo)
 Please follow documentation mongodb_setup.rtf
 
+** Create desktop launcher
 Copy x-boardconfigurator.desktop file in Desktop folder
 Goto Desktop
 Right click on x-boardconfigurator.desktop and say "allow launching"
@@ -38,3 +39,16 @@ Right click on x-boardconfigurator.desktop and say "allow launching"
 1) Open Terminal
 2) cd ~/installer
 3) sudo ./x-boardconfigurator.sh
+if logs file is locked and it is giving an error, then please change permission of logs folder
+cd /home/x-board/git_repo/commservice/gui
+sudo chmod 777 logs
+
+
+** How to restart service if added new tags and groups
+sudo systemctl stop commservice
+sudo systemctl start commservice
+sudo systemctl enable commservice
+
+Check status using following command
+sudo systemctl status commservice
+
