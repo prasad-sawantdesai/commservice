@@ -634,8 +634,8 @@ def setup_logger(is_debugging_needed):
 		if not os.path.exists(logging_path):
 				os.makedirs(logging_path)
 		# setup file logger
-		log_filename = r".\logs\x-board_" + time.strftime("%Y%m%d_%H%M%S") + \
-									 ".log"
+		log_filename = os.path.join(application_path, r"logs\x-board_" + time.strftime("%Y%m%d_%H%M%S") + \
+									 ".log")
 		debugging_option = logging.INFO
 
 		if is_debugging_needed is True:
