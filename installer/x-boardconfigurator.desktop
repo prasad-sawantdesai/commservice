@@ -1,0 +1,4 @@
+[Desktop Entry]
+Exec=/home/x-board/installer/x-boardconfigurator.sh
+Terminal=true
+Type=Application

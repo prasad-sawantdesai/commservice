@@ -29,6 +29,10 @@ https://robomongo.org/download
 Select Robo 3T (formerly Robomongo)
 Please follow documentation mongodb_setup.rtf
 
+Copy x-boardconfigurator.desktop file in Desktop folder
+Goto Desktop
+Right click on x-boardconfigurator.desktop and say "allow launching"
+
 * commservice will run automatically as a service, even it will run on boot
 * To run GUI on Linux
 1) Open Terminal
